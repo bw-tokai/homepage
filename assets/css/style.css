@@ -376,7 +376,7 @@ button.cal__d{border:0;padding:0;font:inherit;font-family:var(--en);font-size:17
 
 /* ---------- access ---------- */
 .access{background:var(--paper);padding-top:112px}
-.venues{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.venues{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
 .venue{background:#fff;padding:32px 32px 36px;border-radius:4px;display:flex;flex-direction:column;position:relative;overflow:hidden}
 .venue::after{content:"";position:absolute;right:-28px;top:-28px;width:96px;height:96px;border-radius:50%;border:12px solid var(--blue-50)}
 .venue__city{font-size:12px;font-weight:700;color:var(--blue)}

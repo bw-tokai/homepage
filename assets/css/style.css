@@ -372,7 +372,7 @@ button.cal__d{border:0;padding:0;font:inherit;font-family:var(--en);font-size:17
 .bring ul{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:14px}
 .bring li::before{content:"";display:inline-block;width:6px;height:6px;background:var(--gold);border-radius:50%;margin-right:8px;vertical-align:2px}
 @media (max-width:960px){.price__grid{grid-template-columns:1fr}.price__note{margin-top:-24px}.bring{grid-column:1;flex-direction:column;gap:12px}}
-@media (max-width:560px){.ticket{grid-template-columns:1fr}.ticket::before,.ticket::after{display:none}.ticket__side{border-left:0;border-top:2px dashed rgba(255,255,255,.25)}.ticket__main{padding:28px 24px}.ticket__side{padding:24px}.ticket__price{font-size:80px}.ticket__free{font-size:48px;margin:8px 0}}
+@media (max-width:560px){.ticket{grid-template-columns:62% 38%}.ticket::before,.ticket::after{left:62%;width:20px;height:20px}.ticket::before{top:-10px}.ticket::after{bottom:-10px}.ticket__main{padding:22px 16px 20px 20px}.ticket__side{padding:22px 14px 20px 16px}.ticket__label{font-size:11px}.ticket__price{font-size:clamp(48px,15vw,64px);margin:6px 0 8px}.ticket__free{font-size:clamp(32px,9.6vw,42px);margin:14px 0 12px}.ticket__sub{font-size:11px;line-height:1.6}}
 
 /* ---------- access ---------- */
 .access{background:var(--paper);padding-top:112px}

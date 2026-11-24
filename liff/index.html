@@ -57,7 +57,7 @@
     <ul>
       <li>電話番号・メールアドレス・友だちリスト・トーク内容は受け取りません。</li>
       <li>このページから、あなたのLINEにメッセージを送ることはありません。</li>
-      <li>保存するのは<b>表示名・ユーザーID・申し込んだ日程（受付日時を含む）</b>と、初回に入力していただく<b>名前・生年月日・性別・ハンドボール歴</b>です。アイコン画像はこの画面に表示するだけで、保存しません。</li>
+      <li>保存するのは<b>表示名・ユーザーID・申し込んだ日程（受付日時を含む）</b>と、初回に入力していただく<b>名前・生年月・性別・ハンドボール歴</b>です。アイコン画像はこの画面に表示するだけで、保存しません。</li>
       <li>名前などの登録情報は、参加者の確認、出欠の管理、練習内容やチーム分けの参考、スポーツ保険などの手続きに使います。</li>
       <li>保存した情報は、クラブの管理者だけが見ます。ほかの利用者に名前が表示されることはありません。</li>
       <li>日程ごとの参加予定人数はほかの利用者にも表示されますが、誰が申し込んだかは表示されません。</li>
@@ -97,11 +97,10 @@
     <label class="reg__lbl" for="r-name">名前<em>必須</em></label>
     <input id="r-name" name="name" type="text" autocomplete="name" maxlength="40" placeholder="例）東海 太郎" required>
 
-    <label class="reg__lbl" for="r-by">生年月日<em>必須</em></label>
+    <label class="reg__lbl" for="r-by">生年月<em>必須</em></label>
     <div class="reg__birth" data-birth>
       <label><input id="r-by" name="by" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="1990" autocomplete="bday-year" aria-label="生まれた年（西暦4けた）"><span>年</span></label>
       <label><input name="bm" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="4" autocomplete="bday-month" aria-label="生まれた月"><span>月</span></label>
-      <label><input name="bd" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="1" autocomplete="bday-day" aria-label="生まれた日"><span>日</span></label>
     </div>
     <p class="reg__hint">年は西暦4けたで入力してください。</p>
 

@@ -7,7 +7,7 @@
  * 保存するもの: 受付日時・日程ID・日付・日程名・LINE表示名・LINEユーザーID、登録情報
  *   「申込一覧」シート … 参加申込
  *   「出席記録」シート … 会場のQRコードから記録した出席（スタンプの元）
- *   「メンバー」シート … 初回の申込で入力してもらう登録情報（名前・生年月日・性別・ハンドボール歴）
+ *   「メンバー」シート … 初回の申込で入力してもらう登録情報（名前・生年月・性別・ハンドボール歴）
  *   「出欠表」シート   … 上の2つから自動で作る一覧（毎晩と、メニューの「出欠表を更新」で作り直し）
  * 保存しないもの: アイコン画像、電話番号、メールアドレスなど
  *
@@ -22,7 +22,7 @@ const SHEET_NAME = '申込一覧';
 const CHECKIN_SHEET = '出席記録';
 const TABLE_SHEET = '出欠表';
 const MEMBER_SHEET = 'メンバー';
-const MEMBER_HEADERS = ['登録日時', 'LINEユーザーID', 'LINE表示名', '名前', '生年月日', '性別', 'ハンドボール歴', '更新日時'];
+const MEMBER_HEADERS = ['登録日時', 'LINEユーザーID', 'LINE表示名', '名前', '生年月', '性別', 'ハンドボール歴', '更新日時'];
 const GENDERS = ['男性', '女性', 'その他'];
 const CAREERS = ['初心者', '1年未満', '1〜3年', '3〜6年', '6年以上'];
 /** 当日に取り消した申込は消さずに、この列に日時を入れて「当日キャンセル」として残す */
@@ -166,6 +166,7 @@ function memberSheet_() {
     sh.getRange('E:E').setNumberFormat('@');
     sh.setColumnWidths(1, MEMBER_HEADERS.length, 140);
   }
+  if (sh.getRange(1, 5).getValue() === '生年月日') sh.getRange(1, 5).setValue('生年月');
   return sh;
 }
 
@@ -187,11 +188,13 @@ function member_(userId) {
 /** 登録情報を保存する（2回目以降は上書き） */
 function register_(user, m) {
   const name = String(m.name || '').trim().slice(0, 40);
-  const birth = String(m.birth || '');
+  let birth = String(m.birth || '');
   const gender = String(m.gender || '');
   const career = String(m.career || '');
   if (!name) throw new Error('bad_name');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(birth) || birth < '1920-01-01' || birth > today_()) throw new Error('bad_birth');
+  /* 生年月（"1990-04"）。古いページから来た "1990-04-01" も年月だけにして受け付ける */
+  if (/^\d{4}-\d{2}-\d{2}$/.test(birth)) birth = birth.slice(0, 7);
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(birth) || birth < '1920-01' || birth > today_().slice(0, 7)) throw new Error('bad_birth');
   if (GENDERS.indexOf(gender) < 0) throw new Error('bad_gender');
   if (CAREERS.indexOf(career) < 0) throw new Error('bad_career');
   const lock = LockService.getScriptLock();

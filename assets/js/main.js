@@ -6,14 +6,14 @@
      "game"  = 試合・大会   "event" = イベント
    title は省略できます（省略すると種類名が表示されます）。 */
 const SCHEDULE = [
-  { date: "2026-12-06", start: "18:00", end: "21:00", venue: "東海市民体育館", type: "solo" },
-  { date: "2026-12-13", start: "13:00", end: "16:00", venue: "緑スポーツセンター", type: "joint", title: "他クラブとの合同練習会" },
-  { date: "2026-12-19", start: "13:00", end: "16:00", venue: "アスカム", type: "match" },
-  { date: "2026-12-27", start: "18:00", end: "21:00", venue: "東海市民体育館", type: "event", title: "練習納め・忘年会" },
-  { date: "2027-01-10", start: "18:00", end: "21:00", venue: "東海市民体育館", type: "solo" },
-  { date: "2027-01-24", start: "09:00", end: "17:00", venue: "会場未定", type: "game", title: "大会（詳細は後日お知らせ）" },
-  { date: "2027-01-31", start: "13:00", end: "16:00", venue: "緑スポーツセンター", type: "joint" },
+  { date: "2026-11-28", start: "18:00", end: "21:00", venue: "親水公園体育館", type: "match", team: "men" },
+  { date: "2026-12-05", start: "17:30", end: "21:00", venue: "知多メディアス体育館", type: "match", team: "men", title: "名南北陵との練習試合" },
+  { date: "2026-12-12", start: "17:30", end: "21:00", venue: "知多メディアス体育館", type: "match", team: "men", title: "名南北陵との練習試合" },
+  { date: "2026-12-19", allDay: true, venue: "であいドーム（岐阜）", type: "game", team: "men", title: "東海マスターズ（1日目）" },
+  { date: "2026-12-20", allDay: true, venue: "であいドーム（岐阜）", type: "game", team: "men", title: "東海マスターズ（2日目）" },
 ];
+/* 終日の予定は start / end の代わりに allDay: true を書きます。
+   team は対象: "men" = 成年男子, "women" = 成年女子, "all" = 男女合同 */
 
 /* 種類ごとの表示名（色は style.css の .t-solo などで指定） */
 const TYPES = {
@@ -25,6 +25,11 @@ const TYPES = {
 };
 const typeLabel = (e) => (TYPES[e.type] || TYPES.solo).label;
 const titleOf = (e) => e.title || typeLabel(e);
+const TEAMS = { men: "成年男子", women: "成年女子", all: "男女合同" };
+const teamLabel = (e) => TEAMS[e.team || "all"];
+const startOf = (e) => (e.allDay ? "00:00" : e.start);
+const endOf = (e) => (e.allDay ? "23:59" : e.end);
+const timeText = (e, sep = "〜") => (e.allDay ? "終日" : `${e.start}${sep}${e.end}`);
 /* 見学・体験の申し込みを受け付ける種類（試合・大会とイベントは対象外） */
 const OPEN_TYPES = ["solo", "joint", "match"];
 const isOpen = (e) => OPEN_TYPES.includes(e.type);
@@ -82,18 +87,22 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
 /* ---------- next practice card + countdown ---------- */
 (() => {
   const now = new Date();
-  const next = SCHEDULE.find((e) => new Date(`${e.date}T${e.end}:00+09:00`) > now) || SCHEDULE[SCHEDULE.length - 1];
+  const next = SCHEDULE.find((e) => new Date(`${e.date}T${endOf(e)}:00+09:00`) > now) || SCHEDULE[SCHEDULE.length - 1];
   const d = parse(next.date);
   const card = $(".matchcard");
   $(".mm", card).textContent = String(d.getMonth() + 1).padStart(2, "0");
   $(".dd", card).textContent = String(d.getDate()).padStart(2, "0");
   $(".dw", card).textContent = DOW_EN[d.getDay()];
   const meta = $$(".matchcard__meta dd", card);
-  meta[0].textContent = `${next.start} – ${next.end}`;
+  meta[0].textContent = timeText(next, " – ");
   meta[1].textContent = next.venue;
   meta[2].innerHTML = `<span class="tchip t-${next.type}">${typeLabel(next)}</span>${next.title ? ` ${next.title}` : ""}`;
+  meta[3].textContent = teamLabel(next);
+  $$("[data-next-text]").forEach((el) => {
+    el.textContent = `${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")} ${DOW_EN[d.getDay()]} ${next.allDay ? "" : next.start + " "}${next.venue}（${teamLabel(next)}）`;
+  });
   const box = $(".matchcard__count", card);
-  const target = new Date(`${next.date}T${next.start}:00+09:00`);
+  const target = new Date(`${next.date}T${startOf(next)}:00+09:00`);
   const tick = () => {
     const ms = Math.max(0, target - new Date());
     $("[data-d]", box).textContent = Math.floor(ms / 864e5);
@@ -131,7 +140,7 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
       const d = parse(e.date);
       return `<li class="ev t-${e.type}" id="ev-${e.date}">
         <div class="ev__date"><b>${d.getMonth() + 1}/${d.getDate()}</b><span>${DOW_EN[d.getDay()]}</span></div>
-        <div class="ev__info"><span class="tchip t-${e.type}">${typeLabel(e)}</span>${e.title ? `<b>${e.title}</b>` : ""}<p><span>${e.start}〜${e.end}</span><span>${e.venue}</span></p></div>
+        <div class="ev__info"><span class="tchip t-${e.type}">${typeLabel(e)}</span><span class="teamchip team-${e.team || "all"}">${teamLabel(e)}</span>${e.title ? `<b>${e.title}</b>` : ""}<p><span>${timeText(e)}</span><span>${e.venue}</span></p></div>
         ${isOpen(e) ? `<a class="ev__go" href="#join" data-date="${e.date}">この日に申し込む</a>` : `<span class="ev__st">メンバーのみ</span>`}
       </li>`;
     }).join("");
@@ -154,7 +163,7 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
       const out = d.getMonth() !== m - 1;
       const cls = ["cal__d", out && "is-out", ev && !out && `is-ev t-${ev.type}`].filter(Boolean).join(" ");
       html += ev && !out
-        ? `<button class="${cls}" data-k="${k}" aria-label="${m}月${d.getDate()}日 ${typeLabel(ev)} ${titleOf(ev)} ${ev.start}から ${ev.venue}">${d.getDate()}</button>`
+        ? `<button class="${cls}" data-k="${k}" aria-label="${m}月${d.getDate()}日 ${typeLabel(ev)} ${titleOf(ev)} ${teamLabel(ev)} ${ev.allDay ? "終日" : ev.start + "から"} ${ev.venue}">${d.getDate()}</button>`
         : `<div class="${cls}">${d.getDate()}</div>`;
     }
     grid.innerHTML = html;
@@ -182,7 +191,8 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
     const d = parse(e.date);
     const o = document.createElement("option");
     o.value = e.date;
-    o.textContent = `${d.getMonth() + 1}/${d.getDate()}（${DOW_JA[d.getDay()]}）${e.start}〜 ${typeLabel(e)}・${e.venue}`;
+    o.dataset.team = e.team || "all";
+    o.textContent = `${d.getMonth() + 1}/${d.getDate()}（${DOW_JA[d.getDay()]}）${e.allDay ? "終日" : e.start + "〜"} ${typeLabel(e)}【${teamLabel(e)}】${e.venue}`;
     sel.appendChild(o);
   });
 })();
@@ -204,6 +214,28 @@ $$("[data-team]").forEach((a) => a.addEventListener("click", () => {
   const r = $(`input[name=team][value="${a.dataset.team}"]`); if (r) r.checked = true;
 }));
 
+/* ---------- form: chosen team filters date options ---------- */
+(() => {
+  const sel = $("[data-date-select]");
+  const team = { "成年男子": "men", "成年女子": "women" };
+  const apply = () => {
+    const r = $("input[name=team]:checked");
+    const t = r ? team[r.value] : null;
+    [...sel.options].forEach((o) => {
+      if (!o.value) return;
+      const ok = !t || o.dataset.team === "all" || o.dataset.team === t;
+      o.hidden = !ok; o.disabled = !ok;
+      if (!ok && o.selected) sel.value = "";
+    });
+    const none = ![...sel.options].some((o) => o.value && !o.hidden);
+    sel.dataset.none = none ? "1" : "";
+    sel.options[0].textContent = none ? "現在受付中の日程はありません（メッセージ欄でご相談ください）" : "日程を選んでください";
+  };
+  $$("input[name=team]").forEach((r) => r.addEventListener("change", apply));
+  $$("[data-team]").forEach((a) => a.addEventListener("click", apply));
+  apply();
+})();
+
 /* ---------- multi-step form ---------- */
 (() => {
   const form = $("#form");
@@ -219,8 +251,9 @@ $$("[data-team]").forEach((a) => a.addEventListener("click", () => {
     if (n === 1) {
       const team = $("input[name=team]:checked", form);
       const date = $("#f-date");
-      date.classList.toggle("is-invalid", !date.value);
-      ok = !!team && !!date.value;
+      const needDate = date.dataset.none !== "1";
+      date.classList.toggle("is-invalid", needDate && !date.value);
+      ok = !!team && (!needDate || !!date.value);
     }
     if (n === 2) {
       const name = $("#f-name"), mail = $("#f-mail");

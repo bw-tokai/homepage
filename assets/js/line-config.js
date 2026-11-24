@@ -16,9 +16,9 @@ const LIFF_URL = `https://liff.line.me/${LIFF_ID}`;
    CHECKIN_EARLY / CHECKIN_LATE … 開始の何分前から、終了の何分後までチェックインできるか */
 const STAMP_CARD = 10;
 const REWARDS = [
-  { at: 5,  label: "スポーツドリンク1本" },
-  { at: 10, label: "次回の参加費 無料" },
-  { at: 30, label: "クラブオリジナルグッズ" },
+  { at: 5,  label: "リストバンド" },
+  { at: 10, label: "タオル" },
+  { at: 20, label: "チームTシャツ" },
 ];
 const CHECKIN_EARLY = 60;
 const CHECKIN_LATE = 60;

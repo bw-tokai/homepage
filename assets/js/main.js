@@ -1,15 +1,6 @@
 /* 拝島ブルーウッド東海 — main.js */
 
-/* ===== 練習日程（ここを書き換えると、カレンダー・一覧・申込フォームの選択肢がすべて更新されます） =====
-   type: "p" = 練習, "g" = 練習試合・イベント */
-const SCHEDULE = [
-  { date: "2026-12-06", start: "18:00", end: "21:00", venue: "東海市民体育館", title: "通常練習", type: "p" },
-  { date: "2026-12-19", start: "13:00", end: "16:00", venue: "緑スポーツセンター", title: "通常練習", type: "p" },
-  { date: "2026-12-27", start: "18:00", end: "21:00", venue: "東海市民体育館", title: "練習納め・忘年会", type: "g" },
-  { date: "2027-01-10", start: "18:00", end: "21:00", venue: "東海市民体育館", title: "通常練習", type: "p" },
-  { date: "2027-01-23", start: "13:00", end: "16:00", venue: "アスカム", title: "通常練習", type: "p" },
-  { date: "2027-01-31", start: "18:00", end: "21:00", venue: "東海市民体育館", title: "東京BWとの交流戦", type: "g" },
-];
+/* 練習日程は assets/js/schedule.js にあります */
 
 const DOW_JA = ["日", "月", "火", "水", "木", "金", "土"];
 const DOW_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -64,17 +55,22 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
 /* ---------- next practice card + countdown ---------- */
 (() => {
   const now = new Date();
-  const next = SCHEDULE.find((e) => new Date(`${e.date}T${e.end}:00+09:00`) > now) || SCHEDULE[SCHEDULE.length - 1];
+  const next = SCHEDULE.find((e) => new Date(`${e.date}T${endOf(e)}:00+09:00`) > now) || SCHEDULE[SCHEDULE.length - 1];
   const d = parse(next.date);
   const card = $(".matchcard");
   $(".mm", card).textContent = String(d.getMonth() + 1).padStart(2, "0");
   $(".dd", card).textContent = String(d.getDate()).padStart(2, "0");
   $(".dw", card).textContent = DOW_EN[d.getDay()];
   const meta = $$(".matchcard__meta dd", card);
-  meta[0].textContent = `${next.start} – ${next.end}`;
+  meta[0].textContent = timeText(next, " – ");
   meta[1].textContent = next.venue;
+  meta[2].innerHTML = `<span class="tchip t-${next.type}">${typeLabel(next)}</span>${next.title ? ` ${next.title}` : ""}`;
+  meta[3].textContent = teamLabel(next);
+  $$("[data-next-text]").forEach((el) => {
+    el.textContent = `${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")} ${DOW_EN[d.getDay()]} ${next.allDay ? "" : next.start + " "}${next.venue}（${teamLabel(next)}）`;
+  });
   const box = $(".matchcard__count", card);
-  const target = new Date(`${next.date}T${next.start}:00+09:00`);
+  const target = new Date(`${next.date}T${startOf(next)}:00+09:00`);
   const tick = () => {
     const ms = Math.max(0, target - new Date());
     $("[data-d]", box).textContent = Math.floor(ms / 864e5);
@@ -110,15 +106,12 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
     const ym = months[mi];
     list.innerHTML = SCHEDULE.filter((e) => e.date.startsWith(ym)).map((e) => {
       const d = parse(e.date);
-      return `<li class="ev ${e.type === "g" ? "is-g" : ""}" id="ev-${e.date}">
+      return `<li class="ev t-${e.type}" id="ev-${e.date}">
         <div class="ev__date"><b>${d.getMonth() + 1}/${d.getDate()}</b><span>${DOW_EN[d.getDay()]}</span></div>
-        <div class="ev__info"><b>${e.title}</b><p><span>${e.start}〜${e.end}</span><span>${e.venue}</span></p></div>
-        <a class="ev__go" href="#join" data-date="${e.date}">この日に申し込む</a>
+        <div class="ev__info"><span class="tchip t-${e.type}">${typeLabel(e)}</span><span class="teamchip team-${e.team || "all"}">${teamLabel(e)}</span>${e.title ? `<b>${e.title}</b>` : ""}<p><span>${timeText(e)}</span><span>${e.venue}</span></p></div>
+        <a class="ev__go" href="${LIFF_URL}?pick=${encodeURIComponent(eventId(e))}" target="_blank" rel="noopener">LINEで申し込む</a>
       </li>`;
     }).join("");
-    $$(".ev__go", list).forEach((a) => a.addEventListener("click", () => {
-      const sel = $("[data-date-select]"); sel.value = a.dataset.date;
-    }));
   };
 
   const renderCal = () => {
@@ -133,9 +126,9 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
       const k = key(d);
       const ev = byDate[k];
       const out = d.getMonth() !== m - 1;
-      const cls = ["cal__d", out && "is-out", ev && !out && `is-${ev.type}`].filter(Boolean).join(" ");
+      const cls = ["cal__d", out && "is-out", ev && !out && `is-ev t-${ev.type}`].filter(Boolean).join(" ");
       html += ev && !out
-        ? `<button class="${cls}" data-k="${k}" aria-label="${m}月${d.getDate()}日 ${ev.title} ${ev.start}から ${ev.venue}">${d.getDate()}</button>`
+        ? `<button class="${cls}" data-k="${k}" aria-label="${m}月${d.getDate()}日 ${typeLabel(ev)} ${titleOf(ev)} ${teamLabel(ev)} ${ev.allDay ? "終日" : ev.start + "から"} ${ev.venue}">${d.getDate()}</button>`
         : `<div class="${cls}">${d.getDate()}</div>`;
     }
     grid.innerHTML = html;
@@ -149,20 +142,14 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
     nextBtn.disabled = mi === months.length - 1;
   };
 
+  const legend = $("[data-cal-legend]");
+  if (legend) legend.innerHTML = Object.entries(TYPES).map(([k, t]) => `<li><i class="lg t-${k}"></i>${t.label}</li>`).join("");
+
   const render = () => { renderCal(); renderList(); };
   prev.addEventListener("click", () => { if (mi > 0) { mi--; render(); } });
   nextBtn.addEventListener("click", () => { if (mi < months.length - 1) { mi++; render(); } });
   render();
 
-  /* form date options */
-  const sel = $("[data-date-select]");
-  SCHEDULE.forEach((e) => {
-    const d = parse(e.date);
-    const o = document.createElement("option");
-    o.value = e.date;
-    o.textContent = `${d.getMonth() + 1}/${d.getDate()}（${DOW_JA[d.getDay()]}）${e.start}〜 ${e.venue}`;
-    sel.appendChild(o);
-  });
 })();
 
 /* ---------- gallery lightbox ---------- */
@@ -177,62 +164,5 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
   dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
 })();
 
-/* ---------- team links prefill ---------- */
-$$("[data-team]").forEach((a) => a.addEventListener("click", () => {
-  const r = $(`input[name=team][value="${a.dataset.team}"]`); if (r) r.checked = true;
-}));
-
-/* ---------- multi-step form ---------- */
-(() => {
-  const form = $("#form");
-  const steps = $$(".step", form);
-  const marks = $$(".steps li", form);
-  const show = (n) => {
-    steps.forEach((s) => s.classList.toggle("is-active", s.dataset.step == n));
-    marks.forEach((m, i) => { m.classList.toggle("is-current", i === n - 1); m.classList.toggle("is-done", i < n - 1); });
-    $$(".err", form).forEach((e) => e.classList.remove("is-shown"));
-  };
-  const valid = (n) => {
-    let ok = true;
-    if (n === 1) {
-      const team = $("input[name=team]:checked", form);
-      const date = $("#f-date");
-      date.classList.toggle("is-invalid", !date.value);
-      ok = !!team && !!date.value;
-    }
-    if (n === 2) {
-      const name = $("#f-name"), mail = $("#f-mail");
-      name.classList.toggle("is-invalid", !name.value.trim());
-      mail.classList.toggle("is-invalid", !mail.checkValidity() || !mail.value);
-      ok = !!name.value.trim() && mail.checkValidity() && !!mail.value;
-    }
-    $(`[data-err="${n}"]`, form).classList.toggle("is-shown", !ok);
-    return ok;
-  };
-  const fill = () => {
-    const fd = new FormData(form);
-    const dateOpt = $("#f-date").selectedOptions[0];
-    const rows = [
-      ["チーム", fd.get("team")], ["参加の方法", fd.get("type")], ["参加したい日", dateOpt ? dateOpt.textContent : ""],
-      ["お名前", fd.get("name")], ["年齢", fd.get("age") || "—"], ["メール", fd.get("email")],
-      ["ハンドボール歴", fd.get("exp")], ["メッセージ", fd.get("message") || "—"],
-    ];
-    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-    $("[data-confirm]", form).innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("");
-  };
-  $$("[data-go]", form).forEach((b) => b.addEventListener("click", () => {
-    const to = Number(b.dataset.go);
-    const cur = Number($(".step.is-active", form).dataset.step);
-    if (to > cur && !valid(cur)) return;
-    if (to === 3) fill();
-    show(to);
-    form.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
-  }));
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    /* 公開時: ここで Googleフォーム / Formspree などへ送信する */
-    steps.forEach((s) => (s.style.display = "none"));
-    $(".steps", form).style.display = "none";
-    $("[data-done]", form).hidden = false;
-  });
-})();
+/* ---------- LINE申込への導線 ---------- */
+$$("[data-liff]").forEach((a) => (a.href = LIFF_URL));

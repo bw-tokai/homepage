@@ -22,10 +22,10 @@
 <!-- ticker -->
 <div class="ticker" aria-label="お知らせ">
   <div class="ticker__track">
-    <span><b>NEXT PRACTICE</b> 12.06 SUN 18:00 東海市民体育館</span>
+    <span><b>NEXT SCHEDULE</b> <em data-next-text>11.28 SAT 18:00 親水公園体育館（成年男子）</em></span>
     <span><b>初回参加無料</b> 見学・体験は随時受付中</span>
     <span><b>MEMBER WANTED</b> 成年男子・成年女子 メンバー募集中</span>
-    <span><b>NEXT PRACTICE</b> 12.06 SUN 18:00 東海市民体育館</span>
+    <span><b>NEXT SCHEDULE</b> <em data-next-text>11.28 SAT 18:00 親水公園体育館（成年男子）</em></span>
     <span><b>初回参加無料</b> 見学・体験は随時受付中</span>
     <span><b>MEMBER WANTED</b> 成年男子・成年女子 メンバー募集中</span>
   </div>
@@ -88,18 +88,19 @@
 
   <aside class="matchcard" aria-labelledby="mc-h">
     <div class="matchcard__head">
-      <h2 id="mc-h">Next Practice</h2>
+      <h2 id="mc-h">Next Schedule</h2>
       <span class="chip chip--live">受付中</span>
     </div>
     <div class="matchcard__date">
-      <span class="mm">12</span><span class="sl">/</span><span class="dd">06</span><span class="dw">SUN</span>
+      <span class="mm">11</span><span class="sl">/</span><span class="dd">28</span><span class="dw">SAT</span>
     </div>
     <dl class="matchcard__meta">
       <div><dt>時間</dt><dd>18:00 – 21:00</dd></div>
-      <div><dt>会場</dt><dd>東海市民体育館</dd></div>
-      <div><dt>対象</dt><dd>成年男子・成年女子 合同</dd></div>
+      <div><dt>会場</dt><dd>親水公園体育館</dd></div>
+      <div><dt>内容</dt><dd>練習試合</dd></div>
+      <div><dt>対象</dt><dd>成年男子</dd></div>
     </dl>
-    <div class="matchcard__count" data-countdown="2026-12-06T18:00:00+09:00">
+    <div class="matchcard__count" data-countdown="2026-11-28T18:00:00+09:00">
       <span>開始まで</span><b data-d>--</b><small>日</small><b data-h>--</b><small>時間</small>
     </div>
   </aside>
@@ -253,7 +254,7 @@
           <button class="cal__nav" data-next aria-label="次の月">›</button>
         </div>
         <div class="cal__grid" data-cal-grid role="grid" aria-label="練習カレンダー"></div>
-        <ul class="cal__legend"><li><i class="lg lg--p"></i>練習日</li><li><i class="lg lg--g"></i>練習試合・イベント</li></ul>
+        <ul class="cal__legend" data-cal-legend aria-label="日程の種類"></ul>
       </div>
 
       <ul class="upcoming" data-upcoming aria-label="今後の練習"></ul>
@@ -343,7 +344,7 @@
     <header class="sh">
       <p class="sh__en">FAQ</p>
       <h2 class="sh__ja">よくある質問</h2>
-      <p class="faq__more">ほかに気になることは、申し込みフォームのメッセージ欄から気軽に聞いてください。</p>
+      <p class="faq__more">ほかに気になることは、練習の場で気軽に聞いてください。LINEの申込ページから見学だけの申し込みもできます。</p>
     </header>
     <div class="faq__list">
       <details open><summary>ハンドボール初心者でも参加できますか？</summary><div><p>大歓迎です。基本の動きから一緒に練習します。体育館シューズと動ける服装で来てください。</p></div></details>
@@ -352,7 +353,7 @@
       <details><summary>毎回参加できなくても大丈夫ですか？</summary><div><p>自分のペースで参加してください。毎回出欠を確認しているので、連絡だけお願いします。</p></div></details>
       <details><summary>どのくらいのレベルですか？</summary><div><p>大学の全国大会経験者から初心者まで、幅広いメンバーがいます。ゲームはレベルに合わせてチームを分けています。</p></div></details>
       <details><summary>子どもを連れて行ってもいいですか？</summary><div><p>大丈夫です。小さなお子さんはできる範囲でみんなで見守りますが、基本は保護者の方の責任でお願いします。</p></div></details>
-      <details><summary>当日いきなり行っても参加できますか？</summary><div><p>人数や会場の都合で、事前連絡のない参加はお断りすることがあります。初めての方は必ずフォームから申し込んでください。</p></div></details>
+      <details><summary>当日いきなり行っても参加できますか？</summary><div><p>人数や会場の都合で、事前連絡のない参加はお断りすることがあります。初めての方は必ずLINEから申し込んでください。</p></div></details>
     </div>
   </div>
 </section>
@@ -364,69 +365,30 @@
     <div class="join__intro">
       <p class="sh__en">Join Us</p>
       <h2>まずは一度、<br>体育館へ。</h2>
-      <p>見学・体験の申し込みは1分で終わります。担当者からメールで当日の案内をお送りします。</p>
+      <p>見学・体験も、メンバーの参加連絡も、申し込みはLINEにまとめています。参加したい日をタップして選ぶだけで、入力はほとんどありません。</p>
       <ul class="join__points">
         <li>初回参加は無料</li>
         <li>見学だけでもOK</li>
-        <li>返信は2〜3日以内</li>
+        <li>複数の日程をまとめて申し込める</li>
       </ul>
     </div>
 
-    <form class="form" id="form" novalidate>
-      <ol class="steps" aria-label="入力の手順">
-        <li class="is-current"><span>1</span>参加の希望</li>
-        <li><span>2</span>あなたについて</li>
-        <li><span>3</span>確認</li>
-      </ol>
-
-      <fieldset class="step is-active" data-step="1">
-        <legend class="vh">参加の希望</legend>
-        <p class="lbl">参加したいチーム<em>必須</em></p>
-        <div class="choice">
-          <label><input type="radio" name="team" value="成年男子" required><span><b>成年男子</b><small>18歳以上の男性</small></span></label>
-          <label><input type="radio" name="team" value="成年女子"><span><b>成年女子</b><small>18歳以上の女性</small></span></label>
-        </div>
-        <p class="lbl">参加の方法<em>必須</em></p>
-        <div class="seg">
-          <label><input type="radio" name="type" value="体験（プレーする）" checked><span>体験（プレーする）</span></label>
-          <label><input type="radio" name="type" value="見学のみ"><span>見学のみ</span></label>
-        </div>
-        <label class="lbl" for="f-date">参加したい日<em>必須</em></label>
-        <select id="f-date" name="date" required data-date-select><option value="">日程を選んでください</option></select>
-        <p class="err" data-err="1">チームと参加したい日を選んでください。</p>
-        <div class="form__nav"><span></span><button type="button" class="btn btn--red" data-go="2">次へ進む<i class="arw"></i></button></div>
-      </fieldset>
-
-      <fieldset class="step" data-step="2">
-        <legend class="vh">あなたについて</legend>
-        <div class="row">
-          <div><label class="lbl" for="f-name">お名前<em>必須</em></label><input id="f-name" name="name" type="text" autocomplete="name" required></div>
-          <div><label class="lbl" for="f-age">年齢</label><input id="f-age" name="age" type="number" inputmode="numeric" min="18" max="99"></div>
-        </div>
-        <label class="lbl" for="f-mail">メールアドレス<em>必須</em></label>
-        <input id="f-mail" name="email" type="email" autocomplete="email" required>
-        <label class="lbl" for="f-exp">ハンドボール歴</label>
-        <select id="f-exp" name="exp"><option>初心者</option><option>1年未満</option><option>1〜3年</option><option>3〜6年</option><option>6年以上</option></select>
-        <label class="lbl" for="f-msg">メッセージ<small>同行者のお名前、質問など</small></label>
-        <textarea id="f-msg" name="message" rows="4"></textarea>
-        <p class="err" data-err="2">お名前と正しいメールアドレスを入力してください。</p>
-        <div class="form__nav"><button type="button" class="btn btn--ghost" data-go="1">戻る</button><button type="button" class="btn btn--red" data-go="3">確認へ進む<i class="arw"></i></button></div>
-      </fieldset>
-
-      <fieldset class="step" data-step="3">
-        <legend class="vh">確認</legend>
-        <dl class="confirm" data-confirm></dl>
-        <p class="form__privacy">送信すると、<a href="#">プライバシーポリシー</a>に同意したものとみなします。</p>
-        <div class="form__nav"><button type="button" class="btn btn--ghost" data-go="2">修正する</button><button type="submit" class="btn btn--red">この内容で申し込む<i class="arw"></i></button></div>
-      </fieldset>
-
-      <div class="done" data-done hidden>
-        <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="20"/><path d="M15 24.5l6 6L33 18"/></svg>
-        <h3>申し込みを受け付けました</h3>
-        <p>2〜3日以内に、担当者からメールで当日の案内をお送りします。体育館でお会いできるのを楽しみにしています。</p>
-        <p class="done__note">※ これは試作版のため、実際には送信されていません。</p>
+    <div class="entry">
+      <div class="entry__head">
+        <p class="entry__k">LINE ENTRY</p>
+        <h3>申し込みは、LINEで。</h3>
       </div>
-    </form>
+      <ol class="entry__steps">
+        <li><span>01</span><div><b>LINEで申込ページを開く</b><p>下のボタンから開きます。パソコンの方はQRコードをスマホで読み取ってください。</p></div></li>
+        <li><span>02</span><div><b>参加したい日をタップ</b><p>今後の予定がカードで並びます。複数の日を選べます。</p></div></li>
+        <li><span>03</span><div><b>「申し込む」を押して完了</b><p>取り消しも同じページからできます。</p></div></li>
+      </ol>
+      <div class="entry__cta">
+        <a class="btn btn--red btn--lg entry__btn" href="https://liff.line.me/2012771321-zQm6WMGw" data-liff target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5C6.8 3.5 2.6 6.9 2.6 11c0 3.7 3.3 6.8 7.8 7.4.3.1.7.2.8.5.1.2.1.6 0 .8l-.1.8c0 .2-.2.9.8.5s5.4-3.2 7.4-5.4c1.4-1.5 2-3 2-4.6 0-4.1-4.2-7.5-9.4-7.5z"/></svg>LINEで申込ページを開く<i class="arw"></i></a>
+        <figure class="entry__qr"><img src="assets/img/line-qr.svg" alt="LINEの申込ページを開くQRコード" width="116" height="116"><figcaption>スマホで読み取る</figcaption></figure>
+      </div>
+      <p class="entry__note">LINEから受け取るのは表示名・アイコン画像・ユーザーIDだけです。電話番号やメールアドレス、友だちリストは受け取りません。くわしくは申込ページに記載しています。</p>
+    </div>
   </div>
 </section>
 
@@ -456,7 +418,7 @@
         <div><p class="footer__name">拝島ブルーウッド東海</p><p>愛知県で活動する社会人ハンドボールクラブ</p></div>
       </div>
       <nav class="footer__nav" aria-label="フッターメニュー">
-        <a href="#about">クラブについて</a><a href="#teams">チーム紹介</a><a href="#schedule">練習日程</a><a href="#price">参加費と持ち物</a><a href="#access">練習会場</a><a href="#faq">よくある質問</a><a href="#join">見学・体験の申し込み</a><a href="#">プライバシーポリシー</a>
+        <a href="#about">クラブについて</a><a href="#teams">チーム紹介</a><a href="#schedule">練習日程</a><a href="#price">参加費と持ち物</a><a href="#access">練習会場</a><a href="#faq">よくある質問</a><a href="#join">参加の申し込み（LINE）</a><a href="#">プライバシーポリシー</a>
       </nav>
       <div class="footer__sns">
         <p>SNSで練習の様子を発信中</p>
@@ -475,6 +437,8 @@
 <div class="mbar"><a href="#schedule">日程を見る</a><a href="#join" class="mbar__cta">体験に申し込む</a></div>
 <a class="totop" href="#top" aria-label="ページの先頭へ">↑</a>
 
+<script src="assets/js/schedule.js" defer></script>
+<script src="assets/js/line-config.js" defer></script>
 <script src="assets/js/main.js" defer></script>
 </body>
 </html>

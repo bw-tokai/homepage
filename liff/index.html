@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>参加申込｜拝島ブルーウッド東海</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#071262">
+<link rel="icon" href="../assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="liff.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="top__bar">
+    <a class="top__brand" href="../" aria-label="拝島ブルーウッド東海 サイトへ">
+      <img src="../assets/img/emblem.png" alt="" width="40" height="40">
+      <span><b>BLUEWOOD TOKAI</b><small>拝島ブルーウッド東海</small></span>
+    </a>
+    <div class="me" data-me hidden>
+      <img data-me-icon alt="" width="32" height="32">
+      <span data-me-name></span>
+    </div>
+  </div>
+  <div class="top__hero">
+    <p class="top__k"><i></i>ENTRY</p>
+    <h1>練習・試合の<br>参加申込</h1>
+    <p class="top__lead">参加する日をタップして選び、下の「申し込む」を押してください。いくつでもまとめて選べます。</p>
+    <a class="top__info" href="#privacy">LINEから受け取る情報について</a>
+  </div>
+</header>
+
+<div class="demo" data-demo hidden>お試し表示です。申込は保存されません。</div>
+
+<main class="main">
+  <div class="filter" role="tablist" aria-label="対象で絞り込む">
+    <button role="tab" aria-selected="true" data-filter="all">すべて</button>
+    <button role="tab" aria-selected="false" data-filter="men">成年男子</button>
+    <button role="tab" aria-selected="false" data-filter="women">成年女子</button>
+  </div>
+
+  <div class="legend">
+    <span><i class="sel"></i>選択中</span>
+    <span><i class="ok"></i>申込済み</span>
+  </div>
+
+  <div class="list" data-list aria-live="polite">
+    <div class="sk"></div><div class="sk"></div><div class="sk"></div>
+  </div>
+
+  <section class="privacy" id="privacy">
+    <h2>LINEから受け取る情報について</h2>
+    <p>この申込ページは、LINEのログイン機能を使っています。LINEから受け取るのは、あなたの<b>表示名・アイコン画像・ユーザーID</b>だけです。</p>
+    <ul>
+      <li>電話番号・メールアドレス・友だちリスト・トーク内容は受け取りません。</li>
+      <li>このページから、あなたのLINEにメッセージを送ることはありません。</li>
+      <li>保存するのは<b>表示名・ユーザーID・申し込んだ日程（受付日時を含む）</b>だけです。アイコン画像はこの画面に表示するだけで、保存しません。</li>
+      <li>保存した情報は、参加人数の確認と当日の連絡のために、クラブの管理者だけが見ます。</li>
+      <li>日程ごとの参加予定人数はほかの利用者にも表示されますが、誰が申し込んだかは表示されません。</li>
+      <li>申込の記録を消したいときは、その日程を「取り消す」か、クラブまでご連絡ください。</li>
+    </ul>
+  </section>
+
+  <p class="foot">© Haijima Bluewood Tokai</p>
+</main>
+
+<div class="bar" data-bar>
+  <p class="bar__n"><b data-n>0</b><span>件を選択中</span></p>
+  <button class="btn" data-submit disabled>申し込む<i class="arw"></i></button>
+</div>
+
+<div class="sheet" data-sheet hidden>
+  <div class="sheet__bg" data-close></div>
+  <div class="sheet__panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <p class="sheet__k" data-sheet-k>CONFIRM</p>
+    <h2 id="sheet-title" data-sheet-title></h2>
+    <ul class="sheet__list" data-sheet-list></ul>
+    <p class="sheet__note" data-sheet-note></p>
+    <div class="sheet__nav">
+      <button class="btn btn--ghost" data-close>やめる</button>
+      <button class="btn" data-ok>申し込む</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" data-toast role="status" hidden></div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../assets/js/schedule.js"></script>
+<script src="../assets/js/line-config.js"></script>
+<script src="liff.js"></script>
+</body>
+</html>

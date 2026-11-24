@@ -7,7 +7,7 @@
  * 保存するもの: 受付日時・日程ID・日付・日程名・LINE表示名・LINEユーザーID、登録情報
  *   「申込一覧」シート … 参加申込
  *   「出席記録」シート … 会場のQRコードから記録した出席（スタンプの元）
- *   「メンバー」シート … 初回の申込で入力してもらう登録情報（名前・生年月・性別・ハンドボール歴）
+ *   「メンバー」シート … 初回の申込で入力してもらう登録情報（姓・名・生年月・性別・ハンドボール歴）
  *   「出欠表」シート   … 上の2つから自動で作る一覧（毎晩と、メニューの「出欠表を更新」で作り直し）
  * 保存しないもの: アイコン画像、電話番号、メールアドレスなど
  *
@@ -22,7 +22,7 @@ const SHEET_NAME = '申込一覧';
 const CHECKIN_SHEET = '出席記録';
 const TABLE_SHEET = '出欠表';
 const MEMBER_SHEET = 'メンバー';
-const MEMBER_HEADERS = ['登録日時', 'LINEユーザーID', 'LINE表示名', '名前', '生年月', '性別', 'ハンドボール歴', '更新日時'];
+const MEMBER_HEADERS = ['登録日時', 'LINEユーザーID', 'LINE表示名', '姓', '名', '生年月', '性別', 'ハンドボール歴', '更新日時'];
 const GENDERS = ['男性', '女性', 'その他'];
 const CAREERS = ['初心者', '1年未満', '1〜3年', '3〜6年', '6年以上'];
 /** 当日に取り消した申込は消さずに、この列に日時を入れて「当日キャンセル」として残す */
@@ -162,11 +162,25 @@ function memberSheet_() {
       .setFontWeight('bold').setBackground('#071262').setFontColor('#ffffff');
     sh.setFrozenRows(1);
     sh.getRange('A:A').setNumberFormat('yyyy/mm/dd hh:mm');
-    sh.getRange('H:H').setNumberFormat('yyyy/mm/dd hh:mm');
-    sh.getRange('E:E').setNumberFormat('@');
-    sh.setColumnWidths(1, MEMBER_HEADERS.length, 140);
+    sh.getRange('I:I').setNumberFormat('yyyy/mm/dd hh:mm');
+    sh.getRange('F:F').setNumberFormat('@');
+    sh.setColumnWidths(1, MEMBER_HEADERS.length, 130);
   }
-  if (sh.getRange(1, 5).getValue() === '生年月日') sh.getRange(1, 5).setValue('生年月');
+  /* 前の形（「名前」1列）のシートを「姓」「名」の2列に直す */
+  if (sh.getRange(1, 4).getValue() === '名前') {
+    sh.insertColumnAfter(4);
+    sh.getRange(1, 4, 1, 2).setValues([['姓', '名']]);
+    sh.getRange(1, 5).setFontWeight('bold').setBackground('#071262').setFontColor('#ffffff');
+    const n = sh.getLastRow() - 1;
+    if (n > 0) {
+      const names = sh.getRange(2, 4, n, 1).getValues().map(function (v) {
+        const p = String(v[0]).trim().split(/[\s\u3000]+/);
+        return [p[0] || '', p.slice(1).join(' ')];
+      });
+      sh.getRange(2, 4, n, 2).setValues(names);
+    }
+  }
+  if (sh.getRange(1, 6).getValue() === '生年月日') sh.getRange(1, 6).setValue('生年月');
   return sh;
 }
 
@@ -175,23 +189,31 @@ function members_() {
   const n = sh.getLastRow() - 1;
   if (n < 1) return [];
   return sh.getRange(2, 1, n, MEMBER_HEADERS.length).getValues().map(function (v, i) {
-    return { row: i + 2, userId: String(v[1]), name: String(v[3]), birth: String(v[4]), gender: String(v[5]), career: String(v[6]) };
+    const last = String(v[3]), first = String(v[4]);
+    return { row: i + 2, userId: String(v[1]), last: last, first: first, name: (last + ' ' + first).trim(),
+      birth: String(v[5]), gender: String(v[6]), career: String(v[7]) };
   });
 }
 
 /** 本人の登録情報（未登録なら null） */
 function member_(userId) {
   const m = members_().filter(function (r) { return r.userId === userId; })[0];
-  return m ? { name: m.name, birth: m.birth, gender: m.gender, career: m.career } : null;
+  return m ? { last: m.last, first: m.first, name: m.name, birth: m.birth, gender: m.gender, career: m.career } : null;
 }
 
 /** 登録情報を保存する（2回目以降は上書き） */
 function register_(user, m) {
-  const name = String(m.name || '').trim().slice(0, 40);
+  let last = String(m.last || '').trim().slice(0, 20);
+  let first = String(m.first || '').trim().slice(0, 20);
+  /* 古いページから「名前」1つで来たときは空白で分ける */
+  if (!last && !first && m.name) {
+    const p = String(m.name).trim().split(/[\s\u3000]+/);
+    last = p[0].slice(0, 20); first = p.slice(1).join(' ').slice(0, 20);
+  }
   let birth = String(m.birth || '');
   const gender = String(m.gender || '');
   const career = String(m.career || '');
-  if (!name) throw new Error('bad_name');
+  if (!last) throw new Error('bad_name');
   /* 生年月（"1990-04"）。古いページから来た "1990-04-01" も年月だけにして受け付ける */
   if (/^\d{4}-\d{2}-\d{2}$/.test(birth)) birth = birth.slice(0, 7);
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(birth) || birth < '1920-01' || birth > today_().slice(0, 7)) throw new Error('bad_birth');
@@ -204,10 +226,10 @@ function register_(user, m) {
     const now = new Date();
     const found = members_().filter(function (r) { return r.userId === user.userId; })[0];
     if (found) {
-      sh.getRange(found.row, 3, 1, 6).setValues([[safe_(user.displayName), safe_(name), birth, gender, career, now]]);
+      sh.getRange(found.row, 3, 1, 7).setValues([[safe_(user.displayName), safe_(last), safe_(first), birth, gender, career, now]]);
     } else {
       sh.getRange(sh.getLastRow() + 1, 1, 1, MEMBER_HEADERS.length)
-        .setValues([[now, user.userId, safe_(user.displayName), safe_(name), birth, gender, career, '']]);
+        .setValues([[now, user.userId, safe_(user.displayName), safe_(last), safe_(first), birth, gender, career, '']]);
     }
   } finally {
     lock.releaseLock();
@@ -226,18 +248,19 @@ function verify_(token) {
   const hit = cache.get(key);
   if (hit) return JSON.parse(hit);
 
-  const v = UrlFetchApp.fetch('https://api.line.me/oauth2/v2.1/verify?access_token=' + encodeURIComponent(token),
-    { muteHttpExceptions: true });
+  /* 2つの確認を同時に行って待ち時間を短くする */
+  const res = UrlFetchApp.fetchAll([
+    { url: 'https://api.line.me/oauth2/v2.1/verify?access_token=' + encodeURIComponent(token), muteHttpExceptions: true },
+    { url: 'https://api.line.me/v2/profile', headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true },
+  ]);
+  const v = res[0], p = res[1];
   if (v.getResponseCode() !== 200) throw new Error('invalid_token');
   const info = JSON.parse(v.getContentText());
   if (String(info.client_id) !== CHANNEL_ID || !(info.expires_in > 0)) throw new Error('invalid_token');
-
-  const p = UrlFetchApp.fetch('https://api.line.me/v2/profile',
-    { headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true });
   if (p.getResponseCode() !== 200) throw new Error('profile_failed');
   const prof = JSON.parse(p.getContentText());
   const user = { userId: prof.userId, displayName: prof.displayName || '' };
-  cache.put(key, JSON.stringify(user), Math.min(600, info.expires_in));
+  cache.put(key, JSON.stringify(user), Math.min(21600, info.expires_in));
   return user;
 }
 

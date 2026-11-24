@@ -94,8 +94,11 @@
     <h2 id="reg-title" data-reg-title>はじめに、あなたのことを教えてください</h2>
     <p class="reg__lead" data-reg-lead>初めての申し込みのときだけ入力します。次回からは日程を選ぶだけです。</p>
 
-    <label class="reg__lbl" for="r-name">名前<em>必須</em></label>
-    <input id="r-name" name="name" type="text" autocomplete="name" maxlength="40" placeholder="例）東海 太郎" required>
+    <p class="reg__lbl">名前<em>必須</em></p>
+    <div class="reg__name">
+      <label><span>姓</span><input id="r-last" name="last" type="text" autocomplete="family-name" maxlength="20" placeholder="東海" aria-label="姓"></label>
+      <label><span>名</span><input id="r-first" name="first" type="text" autocomplete="given-name" maxlength="20" placeholder="太郎" aria-label="名"></label>
+    </div>
 
     <label class="reg__lbl" for="r-by">生年月<em>必須</em></label>
     <div class="reg__birth" data-birth>

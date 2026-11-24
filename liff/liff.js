@@ -14,7 +14,7 @@
   const params = new URLSearchParams(location.search);
   const DEMO = !GAS_URL || params.has("demo");
 
-  const state = { events: [], counts: {}, mine: new Set(), picked: new Set(), filter: "all", busy: false, token: "", member: null };
+  const state = { events: [], counts: {}, mine: new Set(), picked: new Set(), filter: "all", busy: false, token: "", member: null, loaded: false };
 
   /* これから先の予定だけ（終了時刻を過ぎたものは出さない） */
   const now = new Date();
@@ -28,7 +28,7 @@
   };
 
   /* ---------- 通信 ---------- */
-  const demoDb = { counts: {}, mine: new Set(), member: null };
+  const demoDb = { counts: {}, mine: new Set(), member: null, loaded: false };
   state.events.forEach((e, i) => (demoDb.counts[eventId(e)] = [6, 9, 4, 12, 7, 3, 8][i % 7]));
 
   const api = async (action, body = {}) => {
@@ -76,7 +76,7 @@
         ${e.title ? `<h3>${esc(e.title)}</h3>` : ""}
         <p class="ev__meta"><span>${esc(timeText(e))}</span><span>${esc(e.venue)}</span></p>
         <div class="ev__foot">
-          <p class="ev__count"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.4 3-5.2 6-5.2s5.4 1.8 6 5.2"/><circle cx="17" cy="9" r="2.4"/><path d="M16.4 13.9c2.3.2 4 1.6 4.6 4.1"/></svg>参加予定 <b>${n}</b>人</p>
+          <p class="ev__count"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.4 3-5.2 6-5.2s5.4 1.8 6 5.2"/><circle cx="17" cy="9" r="2.4"/><path d="M16.4 13.9c2.3.2 4 1.6 4.6 4.1"/></svg>参加予定 ${state.loaded ? `<b>${n}</b>` : `<b class="ld" aria-label="読み込み中">–</b>`}人</p>
           ${mine ? `<p class="ev__ok">申込済み</p><button class="ev__cancel" data-cancel="${esc(id)}">取り消す</button>` : ""}
         </div>
       </div>
@@ -103,7 +103,7 @@
     }
     const n = state.picked.size;
     $("[data-n]").textContent = n;
-    $("[data-submit]").disabled = !n || state.busy;
+    $("[data-submit]").disabled = !n || state.busy || !state.loaded;
     $("[data-bar]").classList.toggle("is-on", n > 0);
   };
 
@@ -242,7 +242,8 @@
     $("[data-reg-lead]").textContent = first ? "初めての申し込みのときだけ入力します。次回からは日程を選ぶだけです。" : "内容を変えて「保存する」を押してください。";
     $("[data-reg-ok]").textContent = first ? (items && items.length > 1 ? `登録して${items.length}件に申し込む` : "登録して申し込む") : "保存する";
     const m = state.member || {};
-    form.name.value = m.name || "";
+    form.last.value = m.last || "";
+    form.first.value = m.first || "";
     const [by, bm] = (m.birth || "").split("-");
     bIn.y.value = by || ""; bIn.m.value = bm ? String(Number(bm)) : "";
     $$("input[name=gender]", form).forEach((r) => (r.checked = r.value === m.gender));
@@ -265,18 +266,22 @@
   form.addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const m = {
-      name: form.name.value.trim(),
+      last: form.last.value.trim(),
+      first: form.first.value.trim(),
       birth: birthOf(),
       gender: (form.querySelector("input[name=gender]:checked") || {}).value || "",
       career: (form.querySelector("input[name=career]:checked") || {}).value || "",
     };
+    m.name = `${m.last} ${m.first}`.trim(); /* 前のApps Script向け（姓と名を空白でつないだ名前） */
     const badBirth = !m.birth || m.birth > thisMonth || m.birth < "1920-01";
-    form.name.classList.toggle("is-invalid", !m.name);
+    form.last.classList.toggle("is-invalid", !m.last);
+    form.first.classList.toggle("is-invalid", !m.first);
+    const noName = !m.last || !m.first;
     $("[data-birth]", form).classList.toggle("is-invalid", badBirth);
     $(".reg__seg", form).classList.toggle("is-invalid", !m.gender);
     $(".reg__chips", form).classList.toggle("is-invalid", !m.career);
-    if (!m.name || badBirth || !m.gender || !m.career) {
-      $("[data-reg-err]").textContent = m.name && m.gender && m.career && badBirth
+    if (noName || badBirth || !m.gender || !m.career) {
+      $("[data-reg-err]").textContent = !noName && m.gender && m.career && badBirth
         ? "生年月を正しく入力してください（例：1990年4月）。"
         : "未入力の項目があります。すべて入力してください。";
       $("[data-reg-err]").hidden = false;
@@ -307,6 +312,10 @@
   };
 
   const start = async () => {
+    /* 日程はこのページの中にあるので、通信を待たずにすぐ表示する */
+    const pick = new URLSearchParams(location.search).get("pick");
+    if (pick && state.events.some((e) => eventId(e) === pick)) state.picked.add(pick);
+    render();
     if (DEMO) {
       $("[data-demo]").hidden = false;
       showMe("デモ表示", "");
@@ -314,12 +323,11 @@
       await liff.init({ liffId: LIFF_ID });
       if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
       state.token = liff.getAccessToken();
-      try { const p = await liff.getProfile(); showMe(p.displayName, p.pictureUrl); } catch (_) {}
+      liff.getProfile().then((p) => showMe(p.displayName, p.pictureUrl)).catch(() => {});
     }
+    /* 人数と申込済みの日程はあとから反映する */
     take(await api("list"));
-    /* サイトの「LINEで申し込む」から来たときは、その日程を選んだ状態にする */
-    const pick = new URLSearchParams(location.search).get("pick");
-    if (pick && state.events.some((e) => eventId(e) === pick) && !state.mine.has(pick)) state.picked.add(pick);
+    state.loaded = true;
     render();
     const el = pick && $(`.ev[data-id="${CSS.escape(pick)}"]`);
     if (el) el.scrollIntoView({ block: "center" });

@@ -248,18 +248,19 @@ function verify_(token) {
   const hit = cache.get(key);
   if (hit) return JSON.parse(hit);
 
-  const v = UrlFetchApp.fetch('https://api.line.me/oauth2/v2.1/verify?access_token=' + encodeURIComponent(token),
-    { muteHttpExceptions: true });
+  /* 2つの確認を同時に行って待ち時間を短くする */
+  const res = UrlFetchApp.fetchAll([
+    { url: 'https://api.line.me/oauth2/v2.1/verify?access_token=' + encodeURIComponent(token), muteHttpExceptions: true },
+    { url: 'https://api.line.me/v2/profile', headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true },
+  ]);
+  const v = res[0], p = res[1];
   if (v.getResponseCode() !== 200) throw new Error('invalid_token');
   const info = JSON.parse(v.getContentText());
   if (String(info.client_id) !== CHANNEL_ID || !(info.expires_in > 0)) throw new Error('invalid_token');
-
-  const p = UrlFetchApp.fetch('https://api.line.me/v2/profile',
-    { headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true });
   if (p.getResponseCode() !== 200) throw new Error('profile_failed');
   const prof = JSON.parse(p.getContentText());
   const user = { userId: prof.userId, displayName: prof.displayName || '' };
-  cache.put(key, JSON.stringify(user), Math.min(600, info.expires_in));
+  cache.put(key, JSON.stringify(user), Math.min(21600, info.expires_in));
   return user;
 }
 

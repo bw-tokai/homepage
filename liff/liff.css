@@ -266,3 +266,4 @@ body.ck{padding-bottom:24px}
 .reg__name label{display:flex;align-items:center;gap:8px}
 .reg__name span{font-size:13px;font-weight:700;color:var(--mute);flex:none}
 .reg__name input{min-width:0}
+.ev__count b.ld{display:inline-block;min-width:1.2em;text-align:center;color:transparent;border-radius:3px;background:linear-gradient(90deg,#e9ebf3 0,#f6f7fb 40%,#e9ebf3 80%) 0 0/200% 100%;animation:sk 1.2s linear infinite}

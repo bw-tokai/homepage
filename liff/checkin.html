@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>出席チェックイン｜拝島ブルーウッド東海</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#071262">
+<link rel="icon" href="../assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="liff.css">
+</head>
+<body class="ck">
+
+<header class="top top--ck">
+  <div class="top__bar">
+    <a class="top__brand" href="../" aria-label="拝島ブルーウッド東海 サイトへ">
+      <img src="../assets/img/emblem.png" alt="" width="40" height="40">
+      <span><b>BLUEWOOD TOKAI</b><small>拝島ブルーウッド東海</small></span>
+    </a>
+    <div class="me" data-me hidden>
+      <img data-me-icon alt="" width="32" height="32">
+      <span data-me-name></span>
+    </div>
+  </div>
+  <div class="top__hero">
+    <p class="top__k"><i></i>CHECK-IN</p>
+    <h1>出席チェックイン</h1>
+  </div>
+</header>
+
+<main class="main">
+  <div class="demo" data-demo hidden>お試し表示です。出席は記録されません。</div>
+  <section class="result" data-result aria-live="polite">
+    <div class="sk sk--result"></div>
+  </section>
+
+  <section class="card" aria-labelledby="card-title">
+    <div class="card__head">
+      <div>
+        <p class="card__k">STAMP CARD <span data-card-no></span></p>
+        <h2 id="card-title">出席スタンプ</h2>
+      </div>
+      <p class="card__total">通算<b data-total>–</b>回</p>
+    </div>
+    <ol class="card__grid" data-grid></ol>
+    <p class="card__next" data-next></p>
+  </section>
+
+  <section class="rewards" aria-labelledby="rw-title">
+    <h2 id="rw-title">特典</h2>
+    <ul data-rewards></ul>
+    <p class="rewards__note">特典は練習のときにスタッフへこの画面を見せて受け取ってください。</p>
+  </section>
+
+  <section class="privacy">
+    <h2>記録する情報について</h2>
+    <p>このページを開くと、LINEの<b>表示名・ユーザーID</b>と<b>出席した日程・日時</b>をクラブのスプレッドシートに記録します。アイコン画像は表示するだけで保存しません。電話番号・メールアドレス・友だちリストは受け取らず、LINEにメッセージを送ることもありません。記録はクラブの管理者だけが見ます。削除を希望するときはクラブまでご連絡ください。</p>
+  </section>
+
+  <p class="foot">© Haijima Bluewood Tokai</p>
+</main>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../assets/js/schedule.js"></script>
+<script src="../assets/js/line-config.js"></script>
+<script src="checkin.js"></script>
+</body>
+</html>

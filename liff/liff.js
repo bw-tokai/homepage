@@ -1,5 +1,9 @@
 /* 拝島ブルーウッド東海 — LINE参加申込ページ */
 (() => {
+  /* LINEのページでは対象を「一般男子」「一般女子」と表示する */
+  TEAMS.men = "一般男子";
+  TEAMS.women = "一般女子";
+
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));

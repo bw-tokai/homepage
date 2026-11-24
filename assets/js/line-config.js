@@ -10,7 +10,7 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbwwoVlB7PzaIIz2_3S24lcY
 const LIFF_URL = `https://liff.line.me/${LIFF_ID}`;
 
 /* 公式LINEの友だち追加URL（ホームページの申込ボタンはすべてここへ誘導します） */
-const FRIEND_URL = "__FRIEND__";
+const FRIEND_URL = "https://lin.ee/Ofi1f0T";
 
 /* ===== 出席スタンプカード =====
    STAMP_CARD … 1枚のカードのマス数（たまると次のカードへ）

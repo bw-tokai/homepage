@@ -1,15 +1,33 @@
 /* 拝島ブルーウッド東海 — main.js */
 
-/* ===== 練習日程（ここを書き換えると、カレンダー・一覧・申込フォームの選択肢がすべて更新されます） =====
-   type: "p" = 練習, "g" = 練習試合・イベント */
+/* ===== 練習日程（ここを書き換えると、カレンダー・一覧・トップの「次回」・申込フォームの選択肢がすべて更新されます） =====
+   type は次の5種類から選びます:
+     "solo"  = 単独練習会   "joint" = 合同練習会   "match" = 練習試合
+     "game"  = 試合・大会   "event" = イベント
+   title は省略できます（省略すると種類名が表示されます）。 */
 const SCHEDULE = [
-  { date: "2026-12-06", start: "18:00", end: "21:00", venue: "東海市民体育館", title: "通常練習", type: "p" },
-  { date: "2026-12-19", start: "13:00", end: "16:00", venue: "緑スポーツセンター", title: "通常練習", type: "p" },
-  { date: "2026-12-27", start: "18:00", end: "21:00", venue: "東海市民体育館", title: "練習納め・忘年会", type: "g" },
-  { date: "2027-01-10", start: "18:00", end: "21:00", venue: "東海市民体育館", title: "通常練習", type: "p" },
-  { date: "2027-01-23", start: "13:00", end: "16:00", venue: "アスカム", title: "通常練習", type: "p" },
-  { date: "2027-01-31", start: "18:00", end: "21:00", venue: "東海市民体育館", title: "東京BWとの交流戦", type: "g" },
+  { date: "2026-12-06", start: "18:00", end: "21:00", venue: "東海市民体育館", type: "solo" },
+  { date: "2026-12-13", start: "13:00", end: "16:00", venue: "緑スポーツセンター", type: "joint", title: "他クラブとの合同練習会" },
+  { date: "2026-12-19", start: "13:00", end: "16:00", venue: "アスカム", type: "match" },
+  { date: "2026-12-27", start: "18:00", end: "21:00", venue: "東海市民体育館", type: "event", title: "練習納め・忘年会" },
+  { date: "2027-01-10", start: "18:00", end: "21:00", venue: "東海市民体育館", type: "solo" },
+  { date: "2027-01-24", start: "09:00", end: "17:00", venue: "会場未定", type: "game", title: "大会（詳細は後日お知らせ）" },
+  { date: "2027-01-31", start: "13:00", end: "16:00", venue: "緑スポーツセンター", type: "joint" },
 ];
+
+/* 種類ごとの表示名（色は style.css の .t-solo などで指定） */
+const TYPES = {
+  solo:  { label: "単独練習会" },
+  joint: { label: "合同練習会" },
+  match: { label: "練習試合" },
+  game:  { label: "試合・大会" },
+  event: { label: "イベント" },
+};
+const typeLabel = (e) => (TYPES[e.type] || TYPES.solo).label;
+const titleOf = (e) => e.title || typeLabel(e);
+/* 見学・体験の申し込みを受け付ける種類（試合・大会とイベントは対象外） */
+const OPEN_TYPES = ["solo", "joint", "match"];
+const isOpen = (e) => OPEN_TYPES.includes(e.type);
 
 const DOW_JA = ["日", "月", "火", "水", "木", "金", "土"];
 const DOW_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -73,6 +91,7 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
   const meta = $$(".matchcard__meta dd", card);
   meta[0].textContent = `${next.start} – ${next.end}`;
   meta[1].textContent = next.venue;
+  meta[2].innerHTML = `<span class="tchip t-${next.type}">${typeLabel(next)}</span>${next.title ? ` ${next.title}` : ""}`;
   const box = $(".matchcard__count", card);
   const target = new Date(`${next.date}T${next.start}:00+09:00`);
   const tick = () => {
@@ -110,10 +129,10 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
     const ym = months[mi];
     list.innerHTML = SCHEDULE.filter((e) => e.date.startsWith(ym)).map((e) => {
       const d = parse(e.date);
-      return `<li class="ev ${e.type === "g" ? "is-g" : ""}" id="ev-${e.date}">
+      return `<li class="ev t-${e.type}" id="ev-${e.date}">
         <div class="ev__date"><b>${d.getMonth() + 1}/${d.getDate()}</b><span>${DOW_EN[d.getDay()]}</span></div>
-        <div class="ev__info"><b>${e.title}</b><p><span>${e.start}〜${e.end}</span><span>${e.venue}</span></p></div>
-        <a class="ev__go" href="#join" data-date="${e.date}">この日に申し込む</a>
+        <div class="ev__info"><span class="tchip t-${e.type}">${typeLabel(e)}</span>${e.title ? `<b>${e.title}</b>` : ""}<p><span>${e.start}〜${e.end}</span><span>${e.venue}</span></p></div>
+        ${isOpen(e) ? `<a class="ev__go" href="#join" data-date="${e.date}">この日に申し込む</a>` : `<span class="ev__st">メンバーのみ</span>`}
       </li>`;
     }).join("");
     $$(".ev__go", list).forEach((a) => a.addEventListener("click", () => {
@@ -133,9 +152,9 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
       const k = key(d);
       const ev = byDate[k];
       const out = d.getMonth() !== m - 1;
-      const cls = ["cal__d", out && "is-out", ev && !out && `is-${ev.type}`].filter(Boolean).join(" ");
+      const cls = ["cal__d", out && "is-out", ev && !out && `is-ev t-${ev.type}`].filter(Boolean).join(" ");
       html += ev && !out
-        ? `<button class="${cls}" data-k="${k}" aria-label="${m}月${d.getDate()}日 ${ev.title} ${ev.start}から ${ev.venue}">${d.getDate()}</button>`
+        ? `<button class="${cls}" data-k="${k}" aria-label="${m}月${d.getDate()}日 ${typeLabel(ev)} ${titleOf(ev)} ${ev.start}から ${ev.venue}">${d.getDate()}</button>`
         : `<div class="${cls}">${d.getDate()}</div>`;
     }
     grid.innerHTML = html;
@@ -149,6 +168,9 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
     nextBtn.disabled = mi === months.length - 1;
   };
 
+  const legend = $("[data-cal-legend]");
+  if (legend) legend.innerHTML = Object.entries(TYPES).map(([k, t]) => `<li><i class="lg t-${k}"></i>${t.label}</li>`).join("");
+
   const render = () => { renderCal(); renderList(); };
   prev.addEventListener("click", () => { if (mi > 0) { mi--; render(); } });
   nextBtn.addEventListener("click", () => { if (mi < months.length - 1) { mi++; render(); } });
@@ -156,11 +178,11 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
 
   /* form date options */
   const sel = $("[data-date-select]");
-  SCHEDULE.forEach((e) => {
+  SCHEDULE.filter(isOpen).forEach((e) => {
     const d = parse(e.date);
     const o = document.createElement("option");
     o.value = e.date;
-    o.textContent = `${d.getMonth() + 1}/${d.getDate()}（${DOW_JA[d.getDay()]}）${e.start}〜 ${e.venue}`;
+    o.textContent = `${d.getMonth() + 1}/${d.getDate()}（${DOW_JA[d.getDay()]}）${e.start}〜 ${typeLabel(e)}・${e.venue}`;
     sel.appendChild(o);
   });
 })();

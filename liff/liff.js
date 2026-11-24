@@ -167,12 +167,20 @@
   $("[data-submit]").addEventListener("click", async () => {
     const items = state.events.filter((e) => state.picked.has(eventId(e)));
     if (!items.length) return;
-    if (!state.member && !(await openReg(true))) return;
+    if (!state.member) {
+      /* 初回は「登録して申し込む」で登録と申込をまとめて行う */
+      if (!(await openReg(true, items))) return;
+      return doApply(items);
+    }
     const ok = await openSheet({
       k: "CONFIRM", title: `${items.length}件の日程に申し込みます`, items,
       note: "申し込むと、登録した名前でこの日程の参加予定として記録されます。", ok: "申し込む",
     });
     if (!ok) return;
+    doApply(items);
+  });
+
+  const doApply = async (items) => {
     busy(true);
     try {
       take(await api("apply", { events: items.map((e) => ({ id: eventId(e), label: labelOf(e) })) }));
@@ -182,7 +190,7 @@
       toast("申し込みできませんでした。時間をおいてもう一度お試しください。", true);
     }
     busy(false);
-  });
+  };
 
   /* ---------- 取り消す ---------- */
   const askCancel = async (id) => {
@@ -210,14 +218,30 @@
   const form = $("[data-reg-form]");
   let regDone = null;
   const today = new Date(Date.now() + 9 * 36e5).toISOString().slice(0, 10);
-  form.birth.max = today;
-  const openReg = (first) => {
+  const bIn = { y: form.by, m: form.bm, d: form.bd };
+  const digits = (el) => el.value.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0)).replace(/\D/g, "");
+  /* 数字を打つと次の欄へ自動で進む */
+  [[bIn.y, 4, bIn.m], [bIn.m, 2, bIn.d], [bIn.d, 2, null]].forEach(([el, len, next]) => {
+    el.addEventListener("input", () => {
+      el.value = digits(el).slice(0, len);
+      if (next && (el.value.length === len || (len === 2 && Number(el.value) > 1 && el === bIn.m))) next.focus();
+    });
+  });
+  const birthOf = () => {
+    const y = Number(digits(bIn.y)), m = Number(digits(bIn.m)), d = Number(digits(bIn.d));
+    if (!y || !m || !d) return "";
+    const dt = new Date(y, m - 1, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return "";
+    return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  };
+  const openReg = (first, items) => {
     $("[data-reg-title]").textContent = first ? "はじめに、あなたのことを教えてください" : "登録情報の確認・変更";
     $("[data-reg-lead]").textContent = first ? "初めての申し込みのときだけ入力します。次回からは日程を選ぶだけです。" : "内容を変えて「保存する」を押してください。";
-    $("[data-reg-ok]").textContent = first ? "登録して次へ" : "保存する";
+    $("[data-reg-ok]").textContent = first ? (items && items.length > 1 ? `登録して${items.length}件に申し込む` : "登録して申し込む") : "保存する";
     const m = state.member || {};
     form.name.value = m.name || "";
-    form.birth.value = m.birth || "";
+    const [by, bm, bd] = (m.birth || "").split("-");
+    bIn.y.value = by || ""; bIn.m.value = bm ? String(Number(bm)) : ""; bIn.d.value = bd ? String(Number(bd)) : "";
     $$("input[name=gender]", form).forEach((r) => (r.checked = r.value === m.gender));
     $$("input[name=career]", form).forEach((r) => (r.checked = r.value === m.career));
     $("[data-reg-err]").hidden = true;
@@ -239,16 +263,22 @@
     ev.preventDefault();
     const m = {
       name: form.name.value.trim(),
-      birth: form.birth.value,
+      birth: birthOf(),
       gender: (form.querySelector("input[name=gender]:checked") || {}).value || "",
       career: (form.querySelector("input[name=career]:checked") || {}).value || "",
     };
-    const badBirth = !m.birth || m.birth > today;
+    const badBirth = !m.birth || m.birth > today || m.birth < "1920-01-01";
     form.name.classList.toggle("is-invalid", !m.name);
-    form.birth.classList.toggle("is-invalid", badBirth);
+    $("[data-birth]", form).classList.toggle("is-invalid", badBirth);
     $(".reg__seg", form).classList.toggle("is-invalid", !m.gender);
     $(".reg__chips", form).classList.toggle("is-invalid", !m.career);
-    if (!m.name || badBirth || !m.gender || !m.career) { $("[data-reg-err]").hidden = false; return; }
+    if (!m.name || badBirth || !m.gender || !m.career) {
+      $("[data-reg-err]").textContent = m.name && m.gender && m.career && badBirth
+        ? "生年月日を正しく入力してください（例：1990年4月1日）。"
+        : "未入力の項目があります。すべて入力してください。";
+      $("[data-reg-err]").hidden = false;
+      return;
+    }
     const btn = $("[data-reg-ok]");
     btn.disabled = true;
     try {

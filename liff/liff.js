@@ -268,6 +268,7 @@
       gender: (form.querySelector("input[name=gender]:checked") || {}).value || "",
       career: (form.querySelector("input[name=career]:checked") || {}).value || "",
     };
+    m.name = `${m.last} ${m.first}`.trim(); /* 前のApps Script向け（姓と名を空白でつないだ名前） */
     const badBirth = !m.birth || m.birth > thisMonth || m.birth < "1920-01";
     form.last.classList.toggle("is-invalid", !m.last);
     form.first.classList.toggle("is-invalid", !m.first);

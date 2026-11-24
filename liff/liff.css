@@ -254,3 +254,11 @@ body.ck{padding-bottom:24px}
 .reg__seg.is-invalid{box-shadow:inset 0 0 0 1.5px var(--red)}
 .reg__chips.is-invalid span{border-color:#f0b3bd}
 .reg__err{color:var(--red);font-size:12.5px;font-weight:700;margin-top:14px}
+.reg__birth{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:8px}
+.reg__birth label{display:flex;align-items:center;gap:6px}
+.reg__birth input{width:100%;min-width:0;font:inherit;font-size:18px;font-family:var(--en);font-weight:700;letter-spacing:.06em;text-align:center;padding:10px 6px;border:1px solid #cdd2e3;border-radius:4px;background:#fbfbfd;color:var(--ink);min-height:48px;-webkit-appearance:none;appearance:none}
+.reg__birth input::placeholder{color:#b8bdd1;font-weight:600}
+.reg__birth input:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 3px rgba(36,67,196,.15);background:#fff}
+.reg__birth span{font-size:13px;font-weight:700;color:var(--mute);flex:none}
+.reg__birth.is-invalid input{border-color:var(--red)}
+.reg__hint{font-size:11.5px;color:var(--mute);margin-top:6px}

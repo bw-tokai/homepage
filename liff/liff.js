@@ -66,7 +66,6 @@
     const d = parse(e.date);
     const mine = state.mine.has(id);
     const picked = state.picked.has(id);
-    const n = state.counts[id] || 0;
     const dow = d.getDay();
     return `<article class="ev t-${esc(e.type)}${mine ? " is-mine" : ""}${picked ? " is-picked" : ""}" data-id="${esc(id)}">
       <button class="ev__hit" ${mine ? "disabled" : ""} aria-pressed="${picked}" aria-label="${esc(labelOf(e))}${mine ? "（申込済み）" : picked ? "（選択中）" : ""}"></button>
@@ -75,10 +74,7 @@
         <p class="ev__tags"><span class="tchip">${esc(typeLabel(e))}</span><span class="team">${esc(teamLabel(e))}</span></p>
         ${e.title ? `<h3>${esc(e.title)}</h3>` : ""}
         <p class="ev__meta"><span>${esc(timeText(e))}</span><span>${esc(e.venue)}</span></p>
-        <div class="ev__foot">
-          <p class="ev__count"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.4 3-5.2 6-5.2s5.4 1.8 6 5.2"/><circle cx="17" cy="9" r="2.4"/><path d="M16.4 13.9c2.3.2 4 1.6 4.6 4.1"/></svg>参加予定 ${state.loaded ? `<b>${n}</b>` : `<b class="ld" aria-label="読み込み中">–</b>`}人</p>
-          ${mine ? `<p class="ev__ok">申込済み</p><button class="ev__cancel" data-cancel="${esc(id)}">取り消す</button>` : ""}
-        </div>
+        ${mine ? `<div class="ev__foot"><p class="ev__ok">申込済み</p><button class="ev__cancel" data-cancel="${esc(id)}">取り消す</button></div>` : ""}
       </div>
       <span class="ev__check" aria-hidden="true"></span>
     </article>`;

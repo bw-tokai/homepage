@@ -262,3 +262,7 @@ body.ck{padding-bottom:24px}
 .reg__birth span{font-size:13px;font-weight:700;color:var(--mute);flex:none}
 .reg__birth.is-invalid input{border-color:var(--red)}
 .reg__hint{font-size:11.5px;color:var(--mute);margin-top:6px}
+.reg__name{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.reg__name label{display:flex;align-items:center;gap:8px}
+.reg__name span{font-size:13px;font-weight:700;color:var(--mute);flex:none}
+.reg__name input{min-width:0}

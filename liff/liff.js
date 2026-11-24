@@ -238,7 +238,8 @@
     $("[data-reg-lead]").textContent = first ? "初めての申し込みのときだけ入力します。次回からは日程を選ぶだけです。" : "内容を変えて「保存する」を押してください。";
     $("[data-reg-ok]").textContent = first ? (items && items.length > 1 ? `登録して${items.length}件に申し込む` : "登録して申し込む") : "保存する";
     const m = state.member || {};
-    form.name.value = m.name || "";
+    form.last.value = m.last || "";
+    form.first.value = m.first || "";
     const [by, bm] = (m.birth || "").split("-");
     bIn.y.value = by || ""; bIn.m.value = bm ? String(Number(bm)) : "";
     $$("input[name=gender]", form).forEach((r) => (r.checked = r.value === m.gender));
@@ -261,18 +262,21 @@
   form.addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const m = {
-      name: form.name.value.trim(),
+      last: form.last.value.trim(),
+      first: form.first.value.trim(),
       birth: birthOf(),
       gender: (form.querySelector("input[name=gender]:checked") || {}).value || "",
       career: (form.querySelector("input[name=career]:checked") || {}).value || "",
     };
     const badBirth = !m.birth || m.birth > thisMonth || m.birth < "1920-01";
-    form.name.classList.toggle("is-invalid", !m.name);
+    form.last.classList.toggle("is-invalid", !m.last);
+    form.first.classList.toggle("is-invalid", !m.first);
+    const noName = !m.last || !m.first;
     $("[data-birth]", form).classList.toggle("is-invalid", badBirth);
     $(".reg__seg", form).classList.toggle("is-invalid", !m.gender);
     $(".reg__chips", form).classList.toggle("is-invalid", !m.career);
-    if (!m.name || badBirth || !m.gender || !m.career) {
-      $("[data-reg-err]").textContent = m.name && m.gender && m.career && badBirth
+    if (noName || badBirth || !m.gender || !m.career) {
+      $("[data-reg-err]").textContent = !noName && m.gender && m.career && badBirth
         ? "生年月を正しく入力してください（例：1990年4月）。"
         : "未入力の項目があります。すべて入力してください。";
       $("[data-reg-err]").hidden = false;

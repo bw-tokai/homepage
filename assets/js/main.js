@@ -109,7 +109,7 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
       return `<li class="ev t-${e.type}" id="ev-${e.date}">
         <div class="ev__date"><b>${d.getMonth() + 1}/${d.getDate()}</b><span>${DOW_EN[d.getDay()]}</span></div>
         <div class="ev__info"><span class="tchip t-${e.type}">${typeLabel(e)}</span><span class="teamchip team-${e.team || "all"}">${teamLabel(e)}</span>${e.title ? `<b>${e.title}</b>` : ""}<p><span>${timeText(e)}</span><span>${e.venue}</span></p></div>
-        <a class="ev__go" href="${LIFF_URL}?pick=${encodeURIComponent(eventId(e))}" target="_blank" rel="noopener">LINEで申し込む</a>
+        <a class="ev__go" href="${FRIEND_URL}" target="_blank" rel="noopener">LINEで申し込む</a>
       </li>`;
     }).join("");
   };
@@ -165,4 +165,4 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) s
 })();
 
 /* ---------- LINE申込への導線 ---------- */
-$$("[data-liff]").forEach((a) => (a.href = LIFF_URL));
+$$("[data-friend]").forEach((a) => (a.href = FRIEND_URL));

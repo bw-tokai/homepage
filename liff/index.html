@@ -29,7 +29,7 @@
     <p class="top__k"><i></i>ENTRY</p>
     <h1>練習・試合の<br>参加申込</h1>
     <p class="top__lead">参加する日をタップして選び、下の「申し込む」を押してください。いくつでもまとめて選べます。</p>
-    <a class="top__info" href="#privacy">LINEから受け取る情報について</a>
+    <p class="top__links"><a class="top__info" href="#privacy">LINEから受け取る情報について</a><button class="top__edit" data-edit-member hidden>登録情報の確認・変更</button></p>
   </div>
 </header>
 
@@ -57,8 +57,9 @@
     <ul>
       <li>電話番号・メールアドレス・友だちリスト・トーク内容は受け取りません。</li>
       <li>このページから、あなたのLINEにメッセージを送ることはありません。</li>
-      <li>保存するのは<b>表示名・ユーザーID・申し込んだ日程（受付日時を含む）</b>だけです。アイコン画像はこの画面に表示するだけで、保存しません。</li>
-      <li>保存した情報は、参加人数の確認・出欠の管理と当日の連絡のために、クラブの管理者だけが見ます。</li>
+      <li>保存するのは<b>表示名・ユーザーID・申し込んだ日程（受付日時を含む）</b>と、初回に入力していただく<b>名前・生年月日・性別・ハンドボール歴</b>です。アイコン画像はこの画面に表示するだけで、保存しません。</li>
+      <li>名前などの登録情報は、参加者の確認、出欠の管理、練習内容やチーム分けの参考、スポーツ保険などの手続きに使います。</li>
+      <li>保存した情報は、クラブの管理者だけが見ます。ほかの利用者に名前が表示されることはありません。</li>
       <li>日程ごとの参加予定人数はほかの利用者にも表示されますが、誰が申し込んだかは表示されません。</li>
       <li>前日までに「取り消す」を押すと、その申込の記録は削除されます。当日の取り消しは「当日キャンセル」として残ります。記録を消したいときはクラブまでご連絡ください。</li>
     </ul>
@@ -84,6 +85,44 @@
       <button class="btn" data-ok>申し込む</button>
     </div>
   </div>
+</div>
+
+<div class="sheet reg" data-reg hidden>
+  <div class="sheet__bg" data-reg-close></div>
+  <form class="sheet__panel" role="dialog" aria-modal="true" aria-labelledby="reg-title" novalidate data-reg-form>
+    <p class="sheet__k">PROFILE</p>
+    <h2 id="reg-title" data-reg-title>はじめに、あなたのことを教えてください</h2>
+    <p class="reg__lead" data-reg-lead>初めての申し込みのときだけ入力します。次回からは日程を選ぶだけです。</p>
+
+    <label class="reg__lbl" for="r-name">名前<em>必須</em></label>
+    <input id="r-name" name="name" type="text" autocomplete="name" maxlength="40" placeholder="例）東海 太郎" required>
+
+    <label class="reg__lbl" for="r-birth">生年月日<em>必須</em></label>
+    <input id="r-birth" name="birth" type="date" min="1920-01-01" required>
+
+    <p class="reg__lbl">性別<em>必須</em></p>
+    <div class="reg__seg">
+      <label><input type="radio" name="gender" value="男性" required><span>男性</span></label>
+      <label><input type="radio" name="gender" value="女性"><span>女性</span></label>
+      <label><input type="radio" name="gender" value="その他"><span>その他</span></label>
+    </div>
+
+    <p class="reg__lbl">ハンドボール歴<em>必須</em></p>
+    <div class="reg__chips">
+      <label><input type="radio" name="career" value="初心者" required><span>初心者</span></label>
+      <label><input type="radio" name="career" value="1年未満"><span>1年未満</span></label>
+      <label><input type="radio" name="career" value="1〜3年"><span>1〜3年</span></label>
+      <label><input type="radio" name="career" value="3〜6年"><span>3〜6年</span></label>
+      <label><input type="radio" name="career" value="6年以上"><span>6年以上</span></label>
+    </div>
+
+    <p class="reg__err" data-reg-err hidden>未入力の項目があります。すべて入力してください。</p>
+    <p class="sheet__note">入力した情報はクラブの管理者だけが見ます。使い道はこのページ下の「LINEから受け取る情報について」に記載しています。</p>
+    <div class="sheet__nav">
+      <button type="button" class="btn btn--ghost" data-reg-close>やめる</button>
+      <button type="submit" class="btn" data-reg-ok>登録して次へ</button>
+    </div>
+  </form>
 </div>
 
 <div class="toast" data-toast role="status" hidden></div>

@@ -4,9 +4,10 @@
  * このコードは、申込を保存するスプレッドシートの
  * 「拡張機能 → Apps Script」に貼り付けて使います。
  *
- * 保存するもの: 受付日時・日程ID・日付・日程名・LINE表示名・LINEユーザーID
+ * 保存するもの: 受付日時・日程ID・日付・日程名・LINE表示名・LINEユーザーID、登録情報
  *   「申込一覧」シート … 参加申込
  *   「出席記録」シート … 会場のQRコードから記録した出席（スタンプの元）
+ *   「メンバー」シート … 初回の申込で入力してもらう登録情報（名前・生年月日・性別・ハンドボール歴）
  *   「出欠表」シート   … 上の2つから自動で作る一覧（毎晩と、メニューの「出欠表を更新」で作り直し）
  * 保存しないもの: アイコン画像、電話番号、メールアドレスなど
  *
@@ -20,6 +21,10 @@ const CHANNEL_ID = '2012771321';
 const SHEET_NAME = '申込一覧';
 const CHECKIN_SHEET = '出席記録';
 const TABLE_SHEET = '出欠表';
+const MEMBER_SHEET = 'メンバー';
+const MEMBER_HEADERS = ['登録日時', 'LINEユーザーID', 'LINE表示名', '名前', '生年月日', '性別', 'ハンドボール歴', '更新日時'];
+const GENDERS = ['男性', '女性', 'その他'];
+const CAREERS = ['初心者', '1年未満', '1〜3年', '3〜6年', '6年以上'];
 /** 当日に取り消した申込は消さずに、この列に日時を入れて「当日キャンセル」として残す */
 const CANCEL_COL = 7;
 const HEADERS = ['受付日時', '日程ID', '日付', '日程', 'LINE表示名', 'LINEユーザーID'];
@@ -36,6 +41,7 @@ function doPost(e) {
     const user = verify_(req.accessToken);
     switch (req.action) {
       case 'list':   return json_(list_(user));
+      case 'register': return json_(register_(user, req.member || {}));
       case 'apply':  return json_(apply_(user, req.events || []));
       case 'cancel': return json_(cancel_(user, req.eventId));
       case 'stamps': return json_(stamps_(user));
@@ -59,12 +65,13 @@ function list_(user) {
     counts[r.eventId] = (counts[r.eventId] || 0) + 1;
     if (r.userId === user.userId) mine.push(r.eventId);
   });
-  return { ok: true, counts: counts, mine: mine };
+  return { ok: true, counts: counts, mine: mine, member: member_(user.userId) };
 }
 
 /** まとめて申し込む（申込済みの日程は重ねて登録しない） */
 function apply_(user, events) {
   if (!Array.isArray(events) || !events.length) throw new Error('no_events');
+  if (!member_(user.userId)) throw new Error('not_registered');
   if (events.length > 30) throw new Error('too_many');
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
@@ -144,6 +151,67 @@ function checkin_(user, ev) {
   return res;
 }
 
+/* ---------------- メンバー登録 ---------------- */
+
+function memberSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(MEMBER_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(MEMBER_SHEET, ss.getNumSheets());
+    sh.getRange(1, 1, 1, MEMBER_HEADERS.length).setValues([MEMBER_HEADERS])
+      .setFontWeight('bold').setBackground('#071262').setFontColor('#ffffff');
+    sh.setFrozenRows(1);
+    sh.getRange('A:A').setNumberFormat('yyyy/mm/dd hh:mm');
+    sh.getRange('H:H').setNumberFormat('yyyy/mm/dd hh:mm');
+    sh.getRange('E:E').setNumberFormat('@');
+    sh.setColumnWidths(1, MEMBER_HEADERS.length, 140);
+  }
+  return sh;
+}
+
+function members_() {
+  const sh = memberSheet_();
+  const n = sh.getLastRow() - 1;
+  if (n < 1) return [];
+  return sh.getRange(2, 1, n, MEMBER_HEADERS.length).getValues().map(function (v, i) {
+    return { row: i + 2, userId: String(v[1]), name: String(v[3]), birth: String(v[4]), gender: String(v[5]), career: String(v[6]) };
+  });
+}
+
+/** 本人の登録情報（未登録なら null） */
+function member_(userId) {
+  const m = members_().filter(function (r) { return r.userId === userId; })[0];
+  return m ? { name: m.name, birth: m.birth, gender: m.gender, career: m.career } : null;
+}
+
+/** 登録情報を保存する（2回目以降は上書き） */
+function register_(user, m) {
+  const name = String(m.name || '').trim().slice(0, 40);
+  const birth = String(m.birth || '');
+  const gender = String(m.gender || '');
+  const career = String(m.career || '');
+  if (!name) throw new Error('bad_name');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(birth) || birth < '1920-01-01' || birth > today_()) throw new Error('bad_birth');
+  if (GENDERS.indexOf(gender) < 0) throw new Error('bad_gender');
+  if (CAREERS.indexOf(career) < 0) throw new Error('bad_career');
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const sh = memberSheet_();
+    const now = new Date();
+    const found = members_().filter(function (r) { return r.userId === user.userId; })[0];
+    if (found) {
+      sh.getRange(found.row, 3, 1, 6).setValues([[safe_(user.displayName), safe_(name), birth, gender, career, now]]);
+    } else {
+      sh.getRange(sh.getLastRow() + 1, 1, 1, MEMBER_HEADERS.length)
+        .setValues([[now, user.userId, safe_(user.displayName), safe_(name), birth, gender, career, '']]);
+    }
+  } finally {
+    lock.releaseLock();
+  }
+  return list_(user);
+}
+
 /* ---------------- LINEの確認 ---------------- */
 
 /** アクセストークンが本クラブのLIFFで発行されたものか確かめ、本人のプロフィールを返す */
@@ -209,6 +277,7 @@ function rows_(name) {
 function setup() {
   sheet_();
   sheet_(CHECKIN_SHEET);
+  memberSheet_();
   UrlFetchApp.fetch('https://api.line.me/', { muteHttpExceptions: true });
   ScriptApp.getProjectTriggers().forEach(function (t) {
     if (t.getHandlerFunction() === 'updateAttendanceTable') ScriptApp.deleteTrigger(t);
@@ -248,7 +317,10 @@ function updateAttendanceTable() {
     if (!first[r.userId] || d < first[r.userId]) first[r.userId] = d;
   };
   rows_().forEach(function (r) { note(applied, r); });
+  const realName = {};
+  members_().forEach(function (m) { if (m.name) realName[m.userId] = m.name; });
   rows_(CHECKIN_SHEET).forEach(function (r) { note(attended, r); });
+  Object.keys(realName).forEach(function (u) { names[u] = realName[u]; });
 
   const dates = Object.keys(dateSet).sort().reverse();   // 新しい日付が左
   const users = Object.keys(first).sort(function (a, b) {

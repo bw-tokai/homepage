@@ -10,7 +10,7 @@
   const params = new URLSearchParams(location.search);
   const DEMO = !GAS_URL || params.has("demo");
 
-  const state = { events: [], counts: {}, mine: new Set(), picked: new Set(), filter: "all", busy: false, token: "" };
+  const state = { events: [], counts: {}, mine: new Set(), picked: new Set(), filter: "all", busy: false, token: "", member: null };
 
   /* これから先の予定だけ（終了時刻を過ぎたものは出さない） */
   const now = new Date();
@@ -24,7 +24,7 @@
   };
 
   /* ---------- 通信 ---------- */
-  const demoDb = { counts: {}, mine: new Set() };
+  const demoDb = { counts: {}, mine: new Set(), member: null };
   state.events.forEach((e, i) => (demoDb.counts[eventId(e)] = [6, 9, 4, 12, 7, 3, 8][i % 7]));
 
   const api = async (action, body = {}) => {
@@ -32,7 +32,8 @@
       await new Promise((r) => setTimeout(r, 450));
       if (action === "apply") body.events.forEach((ev) => { if (!demoDb.mine.has(ev.id)) { demoDb.mine.add(ev.id); demoDb.counts[ev.id] = (demoDb.counts[ev.id] || 0) + 1; } });
       if (action === "cancel" && demoDb.mine.delete(body.eventId)) demoDb.counts[body.eventId]--;
-      return { ok: true, counts: { ...demoDb.counts }, mine: [...demoDb.mine] };
+      if (action === "register") demoDb.member = { ...body.member };
+      return { ok: true, counts: { ...demoDb.counts }, mine: [...demoDb.mine], member: demoDb.member };
     }
     const res = await fetch(GAS_URL, {
       method: "POST",
@@ -47,6 +48,8 @@
   const take = (data) => {
     state.counts = data.counts || {};
     state.mine = new Set(data.mine || []);
+    state.member = data.member || null;
+    $("[data-edit-member]").hidden = !state.member;
     state.mine.forEach((id) => state.picked.delete(id));
   };
 
@@ -164,9 +167,10 @@
   $("[data-submit]").addEventListener("click", async () => {
     const items = state.events.filter((e) => state.picked.has(eventId(e)));
     if (!items.length) return;
+    if (!state.member && !(await openReg(true))) return;
     const ok = await openSheet({
       k: "CONFIRM", title: `${items.length}件の日程に申し込みます`, items,
-      note: "申し込むと、表示名とユーザーIDがこの日程の参加予定として記録されます。", ok: "申し込む",
+      note: "申し込むと、登録した名前でこの日程の参加予定として記録されます。", ok: "申し込む",
     });
     if (!ok) return;
     busy(true);
@@ -200,6 +204,62 @@
     }
     busy(false);
   };
+
+  /* ---------- 登録情報（初回だけ） ---------- */
+  const reg = $("[data-reg]");
+  const form = $("[data-reg-form]");
+  let regDone = null;
+  const today = new Date(Date.now() + 9 * 36e5).toISOString().slice(0, 10);
+  form.birth.max = today;
+  const openReg = (first) => {
+    $("[data-reg-title]").textContent = first ? "はじめに、あなたのことを教えてください" : "登録情報の確認・変更";
+    $("[data-reg-lead]").textContent = first ? "初めての申し込みのときだけ入力します。次回からは日程を選ぶだけです。" : "内容を変えて「保存する」を押してください。";
+    $("[data-reg-ok]").textContent = first ? "登録して次へ" : "保存する";
+    const m = state.member || {};
+    form.name.value = m.name || "";
+    form.birth.value = m.birth || "";
+    $$("input[name=gender]", form).forEach((r) => (r.checked = r.value === m.gender));
+    $$("input[name=career]", form).forEach((r) => (r.checked = r.value === m.career));
+    $("[data-reg-err]").hidden = true;
+    $$(".is-invalid", form).forEach((el) => el.classList.remove("is-invalid"));
+    reg.hidden = false;
+    requestAnimationFrame(() => reg.classList.add("is-open"));
+    return new Promise((r) => (regDone = r));
+  };
+  const closeReg = (v) => {
+    reg.classList.remove("is-open");
+    setTimeout(() => (reg.hidden = true), 250);
+    if (regDone) { regDone(v); regDone = null; }
+  };
+  $$("[data-reg-close]").forEach((b) => b.addEventListener("click", () => closeReg(false)));
+  $("[data-edit-member]").addEventListener("click", async () => {
+    if (await openReg(false)) toast("登録情報を保存しました");
+  });
+  form.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const m = {
+      name: form.name.value.trim(),
+      birth: form.birth.value,
+      gender: (form.querySelector("input[name=gender]:checked") || {}).value || "",
+      career: (form.querySelector("input[name=career]:checked") || {}).value || "",
+    };
+    const badBirth = !m.birth || m.birth > today;
+    form.name.classList.toggle("is-invalid", !m.name);
+    form.birth.classList.toggle("is-invalid", badBirth);
+    $(".reg__seg", form).classList.toggle("is-invalid", !m.gender);
+    $(".reg__chips", form).classList.toggle("is-invalid", !m.career);
+    if (!m.name || badBirth || !m.gender || !m.career) { $("[data-reg-err]").hidden = false; return; }
+    const btn = $("[data-reg-ok]");
+    btn.disabled = true;
+    try {
+      take(await api("register", { member: m }));
+      render();
+      closeReg(true);
+    } catch (err) {
+      toast("保存できませんでした。時間をおいてもう一度お試しください。", true);
+    }
+    btn.disabled = false;
+  });
 
   /* ---------- はじめに ---------- */
   const showMe = (name, icon) => {

@@ -186,7 +186,9 @@
     if (!e) return;
     const ok = await openSheet({
       k: "CANCEL", title: "この日程の申込を取り消しますか？", items: [e],
-      note: "取り消すと、この日程の申込の記録は削除されます。", ok: "取り消す", danger: true,
+      note: e.date === new Date(Date.now() + 9 * 36e5).toISOString().slice(0, 10)
+        ? "当日の取り消しは「当日キャンセル」として記録に残ります。"
+        : "取り消すと、この日程の申込の記録は削除されます。", ok: "取り消す", danger: true,
     });
     if (!ok) return;
     busy(true);

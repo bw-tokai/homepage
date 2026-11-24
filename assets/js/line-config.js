@@ -5,7 +5,7 @@
               （https://script.google.com/macros/s/……/exec）
               空のままだと、申込ページはお試し表示（デモ）になり、申込は保存されません。 */
 const LIFF_ID = "2012771321-zQm6WMGw";
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwwoVlB7PzaIIz2_3S24lcY1OCfT5jFFV0NIJf-asghHx7BcpYEh79GvwVLQeYuzNmAnQ/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbx_78FClB3Ao_cyhk398DCg-4doDDmTiXNITEbt3WRv8Np9sVSepWRo0I-yAMk0qcHWjw/exec";
 
 const LIFF_URL = `https://liff.line.me/${LIFF_ID}`;
 

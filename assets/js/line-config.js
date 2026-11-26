@@ -1,4 +1,4 @@
-/* 拝島ブルーウッド東海 — LINE参加申込の設定
+/* ブルーウッド東海 — LINE参加申込の設定
 
    LIFF_ID  … LINE Developers の LIFFアプリの「LIFF ID」
    GAS_URL  … Google Apps Script を「ウェブアプリ」として公開したときのURL

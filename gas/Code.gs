@@ -1,5 +1,5 @@
 /**
- * 拝島ブルーウッド東海 — LINE参加申込の受付（Google Apps Script）
+ * ブルーウッド東海 — LINE参加申込の受付（Google Apps Script）
  *
  * このコードは、申込を保存するスプレッドシートの
  * 「拡張機能 → Apps Script」に貼り付けて使います。
@@ -32,7 +32,7 @@ const HEADERS = ['受付日時', '日程ID', '日付', '日程', 'LINE表示名'
 /* ---------------- 受付の入口 ---------------- */
 
 function doGet() {
-  return json_({ ok: true, message: '拝島ブルーウッド東海 参加申込API は動いています。' });
+  return json_({ ok: true, message: 'ブルーウッド東海 参加申込API は動いています。' });
 }
 
 function doPost(e) {

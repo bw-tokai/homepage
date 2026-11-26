@@ -1,9 +1,5 @@
 /* ブルーウッド東海 — 出席チェックイン（会場のQRコードから開く） */
 (() => {
-  /* LINEのページでは対象を「一般男子」「一般女子」と表示する */
-  TEAMS.men = "一般男子";
-  TEAMS.women = "一般女子";
-
   const $ = (s, el = document) => el.querySelector(s);
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DOW = ["日", "月", "火", "水", "木", "金", "土"];

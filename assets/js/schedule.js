@@ -6,7 +6,7 @@
    type は次の5種類から選びます:
      "solo"  = 単独練習会   "joint" = 合同練習会   "match" = 練習試合
      "game"  = 試合・大会   "event" = イベント
-   team は対象: "men" = 成年男子, "women" = 成年女子, "all" = 男女合同
+   team は対象: "men" = 一般男子, "women" = 一般女子, "all" = 男女合同
    終日の予定は start / end の代わりに allDay: true を書きます。
    title は省略できます（省略すると種類名が表示されます）。
 
@@ -30,7 +30,7 @@ const TYPES = {
 };
 const typeLabel = (e) => (TYPES[e.type] || TYPES.solo).label;
 const titleOf = (e) => e.title || typeLabel(e);
-const TEAMS = { men: "成年男子", women: "成年女子", all: "男女合同" };
+const TEAMS = { men: "一般男子", women: "一般女子", all: "男女合同" };
 const teamLabel = (e) => TEAMS[e.team || "all"];
 const startOf = (e) => (e.allDay ? "00:00" : e.start);
 const endOf = (e) => (e.allDay ? "23:59" : e.end);

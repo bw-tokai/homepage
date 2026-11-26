@@ -1,4 +1,4 @@
-/* 拝島ブルーウッド東海 — main.js */
+/* ブルーウッド東海 — main.js */
 
 /* 練習日程は assets/js/schedule.js にあります */
 

@@ -13,7 +13,7 @@
    ※ 申込はこの日程の「日付＋対象」で記録されます。申込が入った後に
      日付や対象を変えると、その申込は別の日程扱いになるので注意してください。 */
 const SCHEDULE = [
-  { date: "2026-11-28", start: "18:00", end: "21:00", venue: "親水公園体育館", type: "match", team: "men" },
+  { date: "2026-11-28", start: "18:00", end: "21:00", venue: "垣見鉄工アリーナ", type: "match", team: "men" },
   { date: "2026-12-05", start: "17:30", end: "21:00", venue: "知多メディアス体育館", type: "match", team: "men", title: "名南北陵との練習試合" },
   { date: "2026-12-12", start: "17:30", end: "21:00", venue: "知多メディアス体育館", type: "match", team: "men", title: "名南北陵との練習試合" },
   { date: "2026-12-19", allDay: true, venue: "であいドーム（岐阜）", type: "game", team: "men", title: "東海マスターズ（1日目）" },
